@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ var remove = &cobra.Command{
 		}
 		projectName := args[0]
 		projectPath := GetConfig().ProjectFolderPath + projectName
-		err := os.RemoveAll(projectPath)
+		err := exec.Command("trash", projectPath)
 		if err != nil {
 			fmt.Println("Error removing project:", err)
 			return
