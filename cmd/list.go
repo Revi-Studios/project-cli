@@ -16,7 +16,7 @@ var listCmd = &cobra.Command{
 	Short: "List all projects",
 	Long:  "List all projects",
 	Run: func(cmd *cobra.Command, args []string) {
-		files, err := os.ReadDir(GetConfig().ProjectFolderPath)
+		files, err := os.ReadDir(GetConfig().ProjectFolderPath + "/")
 		if err != nil {
 			fmt.Println("Error listing projects:", err)
 			return

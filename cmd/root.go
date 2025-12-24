@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const ConfigPath = "/Users/wafflepotato/Projects/project_cli/config.toml"
+const ConfigPath = "config.toml"
 
 type Config struct {
 	ProjectFolderPath string `toml:"path"`
@@ -16,7 +16,7 @@ type Config struct {
 
 func GetConfig() Config {
 	var config Config
-	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
+	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
 		fmt.Println("Error reading config file:", err)
 		return Config{}
 	}

@@ -21,7 +21,7 @@ var remove = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := GetConfig().ProjectFolderPath + projectName
+		projectPath := GetConfig().ProjectFolderPath + "/" + projectName
 		err := exec.Command("trash", projectPath)
 		if err != nil {
 			fmt.Println("Error removing project:", err)

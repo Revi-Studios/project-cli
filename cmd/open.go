@@ -17,7 +17,7 @@ var OpenCmd = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := GetConfig().ProjectFolderPath + projectName + "/"
+		projectPath := GetConfig().ProjectFolderPath + "/" + projectName + "/"
 		if projectPath == "" {
 			fmt.Printf("Project %s not found\n", projectName)
 			return

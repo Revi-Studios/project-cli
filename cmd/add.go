@@ -21,7 +21,7 @@ var add = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := GetConfig().ProjectFolderPath + projectName
+		projectPath := GetConfig().ProjectFolderPath + "/" + projectName
 		err := os.Mkdir(projectPath, 0755)
 		if err != nil {
 			fmt.Println("Error creating project:", err)
