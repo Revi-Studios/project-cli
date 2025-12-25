@@ -41,14 +41,14 @@ func SaveConfig(config Config) error {
 
 // Makes sure a config file is present
 func initConfig() error {
-	if _, err := os.Stat(ConfigPath); os.IsNotExist(err) {
-		file, err := os.Create(ConfigPath)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		SaveConfig(Config{""})
+	if err := os.MkdirAll(filepath.Dir(ConfigPath), 0o755); err != nil {
+		return fmt.Errorf("creating directories %q: %w", ConfigPath, err)
 	}
+	conf, err := os.OpenFile(ConfigPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer conf.Close()
 	return nil
 }
 
@@ -65,6 +65,6 @@ func getConfigPath() string {
 			fmt.Println("Error getting user config directory:", err)
 			os.Exit(1)
 		}
-		return filepath.Join(path, "project-cli/project", "config.toml")
+		return filepath.Join(path, "project-cli", "config.toml")
 	}
 }

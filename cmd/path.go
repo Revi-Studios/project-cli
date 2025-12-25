@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"project_cli/project/config"
 
-	"github.com/BurntSushi/toml"
 	"github.com/spf13/cobra"
 )
 
@@ -13,12 +12,7 @@ var pathCmd = &cobra.Command{
 	Short: "Show the path to the project folder",
 	Long:  "Show the path to the project folder",
 	Run: func(cmd *cobra.Command, args []string) {
-		var config config.Config
-		if _, err := toml.DecodeFile("config.toml", &config); err != nil {
-			fmt.Println("Error reading config file:", err)
-			return
-		}
-		fmt.Println(config.ProjectFolderPath)
+		fmt.Println(config.GetConfig().ProjectFolderPath)
 	},
 }
 
@@ -41,16 +35,7 @@ var pathSetCmd = &cobra.Command{
 	},
 }
 
-var pathGetCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get the path to the project folder",
-	Long:  "Get the path to the project folder",
-	Run: func(cmd *cobra.Command, args []string) {
-	},
-}
-
 func init() {
 	rootCmd.AddCommand(pathCmd)
 	pathCmd.AddCommand(pathSetCmd)
-	pathCmd.AddCommand(pathGetCmd)
 }
