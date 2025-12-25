@@ -1,4 +1,4 @@
-module project_cli/project
+module github.com/Revi-Studios/project-cli
 
 go 1.25.5
 

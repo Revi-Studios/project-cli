@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"project_cli/project/config"
+
+	"github.com/Revi-Studios/project-cli/config"
 
 	"github.com/spf13/cobra"
 )
@@ -35,7 +36,17 @@ var pathSetCmd = &cobra.Command{
 	},
 }
 
+var pathConfig = &cobra.Command{
+	Use:   "config",
+	Short: "Show the path to the project folder",
+	Long:  "Show the path to the project folder",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(config.ConfigPath)
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(pathCmd)
 	pathCmd.AddCommand(pathSetCmd)
+	pathCmd.AddCommand(pathConfig)
 }

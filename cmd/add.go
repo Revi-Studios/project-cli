@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"project_cli/project/config"
 
+	"github.com/Revi-Studios/project-cli/config"
 	"github.com/spf13/cobra"
 )
 

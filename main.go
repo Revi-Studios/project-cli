@@ -1,6 +1,6 @@
 package main
 
-import "project_cli/project/cmd"
+import "github.com/Revi-Studios/project-cli/cmd"
 
 func main() {
 	cmd.Execute()
