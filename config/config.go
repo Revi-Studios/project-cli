@@ -57,6 +57,8 @@ func getConfigPath() string {
 	switch true {
 	case os.Getenv("DEVELOPMENT") == "true" || os.Getenv("DEV") == "true":
 		return "./config.toml"
+	case os.Getenv("CONFIG_PATH") != "":
+		return os.Getenv("CONFIG_PATH")
 	default:
 		path, err := os.UserConfigDir()
 		if err != nil {
