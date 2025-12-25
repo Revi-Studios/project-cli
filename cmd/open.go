@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"project_cli/project/config"
 
 	"github.com/spf13/cobra"
 )
@@ -17,7 +18,7 @@ var OpenCmd = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := GetConfig().ProjectFolderPath + "/" + projectName + "/"
+		projectPath := config.GetConfig().ProjectFolderPath + "/" + projectName + "/"
 		if projectPath == "" {
 			fmt.Printf("Project %s not found\n", projectName)
 			return

@@ -4,33 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/BurntSushi/toml"
 	"github.com/spf13/cobra"
 )
-
-const ConfigPath = "config.toml"
-
-type Config struct {
-	ProjectFolderPath string `toml:"path"`
-}
-
-func GetConfig() Config {
-	var config Config
-	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
-		fmt.Println("Error reading config file:", err)
-		return Config{}
-	}
-	return config
-}
-
-func SaveConfig(config Config) error {
-	conf, err := os.OpenFile(ConfigPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer conf.Close()
-	return toml.NewEncoder(conf).Encode(config)
-}
 
 var rootCmd = &cobra.Command{
 	Use:   "project",

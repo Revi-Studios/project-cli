@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os/exec"
+	"project_cli/project/config"
 
 	"github.com/spf13/cobra"
 )
@@ -21,12 +22,12 @@ var remove = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := GetConfig().ProjectFolderPath + "/" + projectName
-		err := exec.Command("trash", projectPath)
+		projectPath := config.GetConfig().ProjectFolderPath + "/" + projectName
+		err := exec.Command("trash", projectPath).Run()
 		if err != nil {
 			fmt.Println("Error removing project:", err)
 			return
 		}
-		fmt.Println("Project removed successfully")
+		fmt.Println("Project removed:", projectPath)
 	},
 }
