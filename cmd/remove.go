@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/Revi-Studios/project-cli/config"
-
+	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +22,7 @@ var remove = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := config.GetConfig().ProjectFolderPath + "/" + projectName
+		projectPath := lib.GetConfig().ProjectFolderPath + "/" + projectName
 		err := exec.Command("trash", projectPath).Run()
 		if err != nil {
 			fmt.Println("Error removing project:", err)

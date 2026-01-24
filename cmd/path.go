@@ -3,8 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Revi-Studios/project-cli/config"
-
+	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +12,7 @@ var pathCmd = &cobra.Command{
 	Short: "Show the path to the project folder",
 	Long:  "Show the path to the project folder",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(config.GetConfig().ProjectFolderPath)
+		fmt.Println(lib.GetConfig().ProjectFolderPath)
 	},
 }
 
@@ -26,9 +25,9 @@ var pathSetCmd = &cobra.Command{
 			fmt.Println("Usage: path set <path>")
 			return
 		}
-		localConfig := config.GetConfig()
+		localConfig := lib.GetConfig()
 		localConfig.ProjectFolderPath = args[0]
-		if err := config.SaveConfig(localConfig); err != nil {
+		if err := lib.SaveConfig(localConfig); err != nil {
 			fmt.Println("Error writing config file:", err)
 			return
 		}
@@ -41,7 +40,7 @@ var pathConfig = &cobra.Command{
 	Short: "Show the path to the project folder",
 	Long:  "Show the path to the project folder",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(config.ConfigPath)
+		fmt.Println(lib.ConfigPath)
 	},
 }
 

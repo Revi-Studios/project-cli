@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/Revi-Studios/project-cli/config"
-
+	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +18,7 @@ var OpenCmd = &cobra.Command{
 			return
 		}
 		projectName := args[0]
-		projectPath := config.GetConfig().ProjectFolderPath + "/" + projectName + "/"
+		projectPath := lib.GetConfig().ProjectFolderPath + "/" + projectName + "/"
 		if projectPath == "" {
 			fmt.Printf("Project %s not found\n", projectName)
 			return

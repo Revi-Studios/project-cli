@@ -1,4 +1,4 @@
-package config
+package lib
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ var (
 )
 
 type Config struct {
-	ProjectFolderPath string `toml:"path"`
+	ProjectFolderPath string `toml:"config_path"`
 }
 
 // Loads and returns the config from the config file
@@ -65,6 +65,6 @@ func getConfigPath() string {
 			fmt.Println("Error getting user config directory:", err)
 			os.Exit(1)
 		}
-		return filepath.Join(path, "project-cli", "config.toml")
+		return filepath.Join(path, "project", "config.toml")
 	}
 }
