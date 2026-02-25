@@ -18,14 +18,21 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all projects",
 	Long:  "List all projects",
-	Run: func(cmd *cobra.Command, args []string) {
-		files, err := os.ReadDir(lib.GetConfig().ProjectFolderPath + "/")
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
 		if err != nil {
-			fmt.Println("Error listing projects:", err)
-			return
+			return fmt.Errorf("getting the config: %w", err)
 		}
+
+		files, err := os.ReadDir(config.ProjectFolderPath + "/")
+		if err != nil {
+			return fmt.Errorf("reading the project directory: %w", err)
+		}
+
 		fmt.Println("Projects:")
-		os.Chdir(lib.GetConfig().ProjectFolderPath + "/")
+		os.Chdir(config.ProjectFolderPath + "/")
 
 		var projects [][2]string
 		var longestFileName int
@@ -47,6 +54,6 @@ var listCmd = &cobra.Command{
 			strLeft := strings.Repeat(" ", longestFileName-utf8.RuneCountInString(prj[0]))
 			fmt.Println(prj[0], strLeft, "|", prj[1])
 		}
-
+		return nil
 	},
 }

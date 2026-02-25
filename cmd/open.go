@@ -9,26 +9,30 @@ import (
 )
 
 var OpenCmd = &cobra.Command{
-	Use:   "open",
+	Use:   "open <project-name>",
+	Args:  cobra.ExactArgs(1),
 	Short: "Open a project",
 	Long:  "Open a project",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("Please provide a project name")
-			return
-		}
-		projectName := args[0]
-		projectPath := lib.GetConfig().ProjectFolderPath + "/" + projectName + "/"
-		if projectPath == "" {
-			fmt.Printf("Project %s not found\n", projectName)
-			return
-		}
-		err := exec.Command("osascript", "-e", fmt.Sprintf(`tell application "Terminal" to do script "cd '%s'; clear"`, projectPath)).Run()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
 		if err != nil {
-			fmt.Printf("Error opening project %s: %v\n", projectName, err)
-			return
+			return fmt.Errorf("getting the config: %w", err)
 		}
-		fmt.Printf("Opened project %s\n", projectName)
+
+		name := args[0]
+		path := config.ProjectFolderPath + "/" + name + "/"
+
+		// err := exec.Command("osascript", "-e", fmt.Sprintf(`tell application "Terminal" to do script "cd '%s'; clear"`, path)).Run()
+
+		err = exec.Command("open", path).Run()
+
+		if err != nil {
+			return fmt.Errorf("opening project %s: %w", name, err)
+		}
+		fmt.Printf("Opened project: %s\n", name)
+
+		return nil
 	},
 }
 

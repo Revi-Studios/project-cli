@@ -13,21 +13,25 @@ func init() {
 }
 
 var remove = &cobra.Command{
-	Use:   "remove",
+	Use:   "remove <name>",
 	Short: "Remove a project",
 	Long:  "Remove a project",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("Please provide a project name")
-			return
-		}
-		projectName := args[0]
-		projectPath := lib.GetConfig().ProjectFolderPath + "/" + projectName
-		err := exec.Command("trash", projectPath).Run()
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
 		if err != nil {
-			fmt.Println("Error removing project:", err)
-			return
+			return fmt.Errorf("getting the config: %w", err)
 		}
-		fmt.Println("Project removed:", projectPath)
+
+		name := args[0]
+		path := config.ProjectFolderPath + "/" + name
+
+		if err = exec.Command("trash", path).Run(); err != nil {
+			return fmt.Errorf("running 'trash %v': %w", path, err)
+		}
+		fmt.Println("Project removed at:", path)
+
+		return nil
 	},
 }

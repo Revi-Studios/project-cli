@@ -17,20 +17,21 @@ type Config struct {
 }
 
 // Loads and returns the config from the config file
-func GetConfig() Config {
-	initConfig()
+func GetConfig() (Config, error) {
+	if err := validateConfigFile(); err != nil {
+		return Config{}, fmt.Errorf("validating the config: %w", err)
+	}
 	var config Config
 
 	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
-		fmt.Println("Error reading config file:", err)
-		return Config{}
+		return Config{}, fmt.Errorf("reading config file: %w", err)
 	}
-	return config
+	return config, nil
 }
 
 // Saves the config to the config file
 func SaveConfig(config Config) error {
-	initConfig()
+	validateConfigFile()
 	conf, err := os.OpenFile(ConfigPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
@@ -40,13 +41,17 @@ func SaveConfig(config Config) error {
 }
 
 // Makes sure a config file is present
-func initConfig() error {
+func validateConfigFile() error {
 	if err := os.MkdirAll(filepath.Dir(ConfigPath), 0o755); err != nil {
 		return fmt.Errorf("creating directories %q: %w", ConfigPath, err)
 	}
 	conf, err := os.OpenFile(ConfigPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		if os.IsExist(err) {
+			return nil
+		}
+
+		return fmt.Errorf("opening the file %v: %w", ConfigPath, err)
 	}
 	defer conf.Close()
 	return nil

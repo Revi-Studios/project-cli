@@ -13,29 +13,32 @@ func init() {
 }
 
 var add = &cobra.Command{
-	Use:   "add",
+	Use:   "add <name> <tag>",
 	Short: "Add a new project",
 	Long:  `Add a new project to the project list`,
-	Run: func(cmd *cobra.Command, args []string) {
-		switch {
-		case len(args) == 0:
-			fmt.Println("Please provide a project name and tag")
-			return
-		case len(args) == 1:
-			fmt.Println("Please provide a tag")
-			return
-		}
-		projectName := args[0]
-		projectPath := lib.GetConfig().ProjectFolderPath + "/" + projectName
-		err := os.Mkdir(projectPath, 0755)
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		name := args[0]
+
+		config, err := lib.GetConfig()
+
 		if err != nil {
-			fmt.Println("Error creating project:", err)
-			return
+			return fmt.Errorf("getting the config: %w", err)
 		}
+
+		projectPath := config.ProjectFolderPath + "/" + name
+		err = os.Mkdir(projectPath, 0755)
+
+		if err != nil {
+			return fmt.Errorf("creating the directory: %w", err)
+		}
+
+		fmt.Println("Project created at:", projectPath)
+
 		if err := lib.SetTag(projectPath, args[1]); err != nil {
-			fmt.Println("Error adding tag:", err)
-			return
+			return fmt.Errorf("Error adding tag: %w", err)
 		}
-		fmt.Println("Project created:", projectPath)
+
+		return nil
 	},
 }

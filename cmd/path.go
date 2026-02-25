@@ -11,27 +11,46 @@ var pathCmd = &cobra.Command{
 	Use:   "path",
 	Short: "Show the path to the project folder",
 	Long:  "Show the path to the project folder",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(lib.GetConfig().ProjectFolderPath)
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
+		if err != nil {
+			return fmt.Errorf("getting the config: %w", err)
+		}
+
+		fmt.Println(config.ProjectFolderPath)
+		return nil
 	},
 }
 
 var pathSetCmd = &cobra.Command{
-	Use:   "set",
+	Use:   "set <path>",
 	Short: "Set the path to the project folder",
 	Long:  "Set the path to the project folder",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			fmt.Println("Usage: path set <path>")
-			return
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
+		if err != nil {
+			return fmt.Errorf("getting the config: %w", err)
 		}
-		localConfig := lib.GetConfig()
-		localConfig.ProjectFolderPath = args[0]
-		if err := lib.SaveConfig(localConfig); err != nil {
-			fmt.Println("Error writing config file:", err)
-			return
+
+		config.ProjectFolderPath = args[0]
+
+		if err := lib.SaveConfig(config); err != nil {
+			return fmt.Errorf("saving config file: %w", err)
 		}
-		fmt.Println("Project folder path set to:", localConfig.ProjectFolderPath)
+
+		config, err = lib.GetConfig()
+
+		if err != nil {
+			return fmt.Errorf("getting the config after saving it: %w", err)
+		}
+
+		fmt.Println("Project folder path set to:", config.ProjectFolderPath)
+
+		return nil
 	},
 }
 

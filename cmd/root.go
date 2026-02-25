@@ -4,17 +4,26 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "project",
 	Short: "",
-	Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at https://gohugo.io/documentation/`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+	Long:  `Base command. If another command isn't added, it opens the project folder.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := lib.GetConfig()
+
+		if err != nil {
+			return fmt.Errorf("getting the config: %w", err)
+		}
+
+		err = lib.OpenFolder(config.ProjectFolderPath)
+		if err != nil {
+			return fmt.Errorf("Faild to open the project folder: %w", err)
+		}
+		return nil
 	},
 }
 
