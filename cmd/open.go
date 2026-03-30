@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
@@ -39,7 +40,11 @@ var openCmd = &cobra.Command{
 		if errors.Unwrap(err) != nil {
 			return fmt.Errorf("opening project %s: %w", name, err)
 		}
-		fmt.Printf("Opened project: %s\n", name)
+
+		// Turns the first character to uppercase
+		targetToCapital := func() string { str := []rune(target); return strings.ToUpper(string(str[0])) + string(str[1:]) }()
+
+		fmt.Printf("Opened project: %s, in %s\n", name, targetToCapital)
 
 		return nil
 	},

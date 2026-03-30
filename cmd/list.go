@@ -34,10 +34,10 @@ var listCmd = &cobra.Command{
 		fmt.Println("Projects:")
 		os.Chdir(config.ProjectFolderPath + "/")
 
-		var projects [][2]string
+		projects := make([][2]string, len(files))
 		var longestFileName int
 
-		for _, file := range files {
+		for i, file := range files {
 			if file.IsDir() {
 				name := file.Name()
 				tags, err := lib.GetTags(name)
@@ -46,11 +46,14 @@ var listCmd = &cobra.Command{
 				if len := utf8.RuneCountInString(name); len > longestFileName {
 					longestFileName = len
 				}
-				projects = append(projects, [2]string{name, tags})
+				projects[i] = [2]string{name, tags}
 
 			}
 		}
 		for _, prj := range projects {
+			if prj == [2]string{"", ""} {
+				continue
+			}
 			strLeft := strings.Repeat(" ", longestFileName-utf8.RuneCountInString(prj[0]))
 			fmt.Println(prj[0], strLeft, "|", prj[1])
 		}
