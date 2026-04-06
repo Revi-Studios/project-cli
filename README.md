@@ -4,7 +4,6 @@ Easily manage your projects with Project CLI. Use commands such as `add`, `list`
 
 > [!NOTE]
 > This tool is developed on and for MacOs machines. Some features might not work properly on other platforms because of platform specific terminal commands.
->
 
 ## Content:
 
@@ -28,7 +27,6 @@ go install https://github.com/Revi-Studios/project-cli
 
 This will get the code from this repository and install it to your path.
 
-
 **2. Download a prebuilt binary and adding it to your path manually:**
 
 For this step you only need to download the prebuilt binary and find where you path lives on you computer. (Where new commands are saved and found)
@@ -36,7 +34,6 @@ For this step you only need to download the prebuilt binary and find where you p
 1. Download the latest stable prebuilt binary from [releases](https://github.com/Revi-Studios/project-cli/releases).
 2. Add it to you path
 3. Try it out!
-
 
 ## How do I get started?
 
@@ -54,9 +51,9 @@ These commands:
 2. Cd into it
 3. Configures the cli to use the current path as the project path using `path set <path>`.
 
->[!NOTE]
+> [!NOTE]
 > `pwd` returns the current path the terminal is at.
-> You don't need to create a new folder, name it *Projects* nore use it as the project folder.
+> You don't need to create a new folder, name it _Projects_ nore use it as the project folder.
 >
 > You can use which ever path you want, just replace `$(pwd)` with your own path.
 
@@ -78,6 +75,6 @@ Available Commands:
   path                          Show the path to the project folder
     set     <path>              Set the path to the project folder
     config                      Show the path to the project folder
-  list                          List all projects
+  list      [flags]             List all projects
   help      <command>           Help about any command
 ```
