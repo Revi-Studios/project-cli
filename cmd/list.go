@@ -11,6 +11,7 @@ import (
 
 	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 func init() {
@@ -47,15 +48,15 @@ var listCmd = &cobra.Command{
 
 			// Format data
 			projectsMap := make(map[string][]string)
-			projectData := make(map[string][3]int)
+			projectData := make(map[string][2]int)
 			for _, file := range files {
 				if file.IsDir() {
 					longestWordLength := 0
-					name := file.Name()
-					tags, _ := lib.GetTags(name)
+					name := " - " + file.Name()
+					tags, _ := lib.GetTags(file.Name())
 
 					// Adjusts the longest name if needed
-					if len := utf8.RuneCountInString(name) + 3; len > longestWordLength {
+					if len := utf8.RuneCountInString(name); len > longestWordLength {
 						longestWordLength = len
 					}
 					if len := utf8.RuneCountInString(tags); len > longestWordLength {
@@ -64,6 +65,9 @@ var listCmd = &cobra.Command{
 
 					if tags == "" {
 						tags = "[Without Tags]"
+					}
+					if projectsMap[tags] == nil {
+						projectsMap[tags] = append(projectsMap[tags], tags)
 					}
 					projectsMap[tags] = append(projectsMap[tags], name)
 
@@ -81,71 +85,58 @@ var listCmd = &cobra.Command{
 			// Calculate default box size
 			var height, width int
 			for _, n := range projectData {
-				width += n[0] + 1
-				height += n[1] + 2
+				width += n[0]
+				height += n[1] + 1
 			}
 			width /= len(projectData)
 			height /= len(projectData)
 
 			// Calculating category sizes relative to the defaul box sizes
 			for c, n := range projectData {
-				projectData[c] = [3]int{int(math.Ceil(float64(n[0]) / float64(width))), int(math.Ceil(float64(n[1]+3) / float64(height)))}
+				projectData[c] = [2]int{int(math.Ceil(float64(n[0]) / float64(width))), int(math.Ceil(float64(n[1]+3) / float64(height)))}
 			}
 
-			/*
-				// Default
-				println("Default 1:1")
-				fmt.Println("+" + strings.Repeat("-", width) + "+")
-				for range height {
-					fmt.Println("|" + strings.Repeat(" ", width) + "|")
-				}
-				fmt.Println("+" + strings.Repeat("-", width) + "+")
-				println("")
+			// Gets the terminal width
+			termWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 
-				// Print out boxes for refrence
-				for c, n := range projectData {
-					println(c, strconv.Itoa(n[0])+":"+strconv.Itoa(n[1]))
-
-					fmt.Println("+" + strings.Repeat("-", n[0]*width) + "+")
-					for range n[1] * height {
-						fmt.Println("|" + strings.Repeat(" ", n[0]*width) + "|")
-					}
-					fmt.Println("+" + strings.Repeat("-", n[0]*width) + "+")
-					println("")
-				}
-			*/
+			if err != nil {
+				return fmt.Errorf("reading terminal width: %w", err)
+			}
 
 			var index int = 0
-			var viewW int = 4
+			var viewW int = termWidth / width
 			var bitMap uint64
+			var renderBuf = make(map[int]string)
 
-			var done int
-			var projectsDone = make(map[string]bool, len(projectData))
-
-			// Inserts the blocks into the bitmap
+			//	Maps the blocks into the renderbuffer
 		MapBlocks:
 			for {
-				if done == len(projectData) {
+				if len(projectData) == 0 {
 					break MapBlocks
 				}
 
+				// Find emty space
 				if getBit(&bitMap, index) == 0 {
-					space := nextBitChangeOrWall(&bitMap, viewW, index)
+					space := nextSetBitOrNewRow(&bitMap, viewW, index) + 1
 
 					round := 0
 				FindBlock:
 					for {
 						for c, n := range projectData {
 							// Finds a block that fits
-							if n[0] == space-round && !projectsDone[c] {
-								projectsDone[c] = true
+							if n[0] == space-round {
+								delete(projectData, c)
+								insertBlockIntoBitMap(&bitMap, n, viewW, index)
 
-								temp := projectData[c]
-								temp[2] = (index - 1) * height
-								projectData[c] = temp
+								for i, s := range projectsMap[c] {
+									for column := range (len(s) + width) / width {
+										str := s
 
-								done++
-								insertBlockIntoBitMap(&bitMap, [2]int{n[0], n[1]}, viewW, index)
+										str = string([]rune(str)[min(column*width, len(str)):min(column*width+width, len(str))])
+										str = str + strings.Repeat(" ", width-len(str))
+										renderBuf[index*height+i*viewW+column] = str
+									}
+								}
 
 								index += n[0] - 1
 								break FindBlock
@@ -165,36 +156,6 @@ var listCmd = &cobra.Command{
 			}
 
 			var renderBuilder = strings.Builder{}
-			var renderBuf = make(map[int]string, (len(strconv.FormatUint(bitMap, 2)) * height))
-
-			// Insert values into the render buffer
-			for c, data := range projectData {
-				strs := append([]string{c}, projectsMap[c]...)
-
-				for i := range data[1] * height * data[0] {
-					var str string
-
-					switch true {
-					case i/data[0] == 0:
-						str = strs[i/data[0]]
-					case i >= len(strs)*data[0]:
-						continue
-					default:
-						str = " - " + strs[i/data[0]]
-					}
-
-					str = string([]rune(str)[min(i%data[0]*width, len(str)):min(i%data[0]*width+width, len(str))])
-					if str == "" {
-						continue
-					}
-					str = str + strings.Repeat(" ", width-len(str))
-
-					str = "\033[38;5;" + strconv.Itoa(data[2]*100%255) + "m" + str + "\033[0m"
-
-					renderBuf[(i/data[0]*viewW + data[2] + i%data[0])] = str
-				}
-
-			}
 
 			// Writing every string piece to the renderBuilder for string building
 			for i := range len(strconv.FormatUint(bitMap, 2)) * height {
@@ -206,44 +167,20 @@ var listCmd = &cobra.Command{
 				default:
 					str = strings.Repeat(" ", width)
 				}
-				str = "|" + str
-
-				if (i+1)%viewW == 0 {
-					str += "\n"
-				}
-
-				if i%(viewW*height) == 0 {
-					str += "\n" + strings.Repeat("+"+strings.Repeat("-", width), viewW) + "+\n"
-				}
 
 				renderBuilder.WriteString(str)
+
+				if (i+1)%viewW == 0 {
+					renderBuilder.WriteString("\n")
+				}
 			}
 
 			fmt.Println("Info:", width, height, viewW)
-			fmt.Println("Projects:", len(projectData))
+			fmt.Println("Projects:", len(projectsMap))
+
 			// Print the renderd string
 			fmt.Println(renderBuilder.String())
 
-			/*
-				// Print grid with values
-				println(strings.Repeat("+"+strings.Repeat("-", width), viewW) + "+")
-				for y := range 12 {
-					for h := range height {
-						for i := range viewW {
-							if h == int(math.Ceil(float64(height)/2)) {
-								print("|" + strings.Repeat(" ", int(math.Floor(float64(width)/2))-1) + strconv.Itoa(int((bitMap>>uint((y*viewW)+i+1))&1)) + strings.Repeat(" ", int(math.Ceil(float64(width)/2))))
-								continue
-							}
-							print("|" + strings.Repeat(" ", width))
-						}
-						print("|\n")
-					}
-					for range viewW {
-						print("+" + strings.Repeat("-", width))
-					}
-					print("+\n")
-				}
-			*/
 		case "category", "c":
 			projectsMap := make(map[string][]string)
 			for _, file := range files {
@@ -320,32 +257,20 @@ func getBit(bitMap *uint64, index int) int {
 	return int((*bitMap >> index) & 1)
 }
 
-func nextBitChangeOrWall(bitMap *uint64, rowLength, index int) int {
-	firstBit, firstline := getBit(bitMap, index), math.Floor(float64(index)/float64(rowLength))
-	times := 0
-	for {
-		bit := getBit(bitMap, index)
-
-		if math.Floor(float64(index)/float64(rowLength)) != firstline || bit != firstBit {
-			break
+func nextSetBitOrNewRow(bitMap *uint64, rowLength, index int) int {
+	r := 0
+	for r = range rowLength - (index % rowLength) - 1 {
+		if index++; getBit(bitMap, index) == 1 {
+			return r
 		}
-		index++
-		times++
 	}
-	return times
+	return r + 1
 }
 
 func insertBlockIntoBitMap(bitMap *uint64, block [2]int, rowLength, index int) {
-	for line := range block[0] {
-		for column := range block[1] {
-			*bitMap |= (1 << uint(index+(line*rowLength)+column))
+	for line := range block[1] {
+		for column := range block[0] {
+			*bitMap |= (1 << uint(index+column+(line*rowLength)))
 		}
 	}
-}
-
-func min(x, y int) int {
-	if x > y {
-		return y
-	}
-	return x
 }
