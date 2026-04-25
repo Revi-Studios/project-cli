@@ -27,11 +27,11 @@ var openCmd = &cobra.Command{
 		target, _ := cmd.Flags().GetString("app")
 
 		switch target {
-		case "finder":
+		case "finder", "f":
 			err = fmt.Errorf("finder: %w", exec.Command("open", path).Run())
-		case "terminal":
+		case "terminal", "t":
 			err = fmt.Errorf("terminal: %w", exec.Command("open", "-a", "Terminal", path).Run())
-		case "zed":
+		case "zed", "z":
 			err = fmt.Errorf("zed: %w", exec.Command("zed", path).Run())
 		default:
 			return fmt.Errorf("unknown target: %s", target)
