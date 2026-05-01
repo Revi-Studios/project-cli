@@ -1,9 +1,25 @@
+//go:build !windows
+
 package lib
 
-import "os/exec"
+import (
+	"os/exec"
+	"runtime"
+)
 
+// Opens the folder in the filemanager
 func OpenFolder(path string) error {
-	err := exec.Command("open", path).Run()
+	var cmd *exec.Cmd
 
-	return err
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.Command("open", path)
+	case "linux":
+		cmd = exec.Command("xdg-open", path)
+	default:
+		// Fallback for other Unix-like systems
+		cmd = exec.Command("xdg-open", path) 
+	}
+
+	return cmd.Run()
 }
