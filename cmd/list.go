@@ -31,17 +31,20 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		files, err := os.ReadDir(config.ProjectFolderPath + "/")
+		files, err := os.ReadDir(config.ProjectPath() + "/")
 		if err != nil {
 			return fmt.Errorf("reading the project directory: %w", err)
 		}
 
-		os.Chdir(config.ProjectFolderPath + "/")
+		os.Chdir(config.ProjectPath() + "/")
 
 		var longestFileName int
 		var longestTagName int
 
 		str, _ := cmd.Flags().GetString("view")
+		if str == "" {
+			str = config.Defaults.View
+		}
 
 		switch str {
 

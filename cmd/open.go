@@ -22,17 +22,21 @@ var openCmd = &cobra.Command{
 		}
 
 		name := args[0]
-		path := config.ProjectFolderPath + "/" + name + "/"
+		path := config.ProjectPath() + "/" + name + "/"
 
 		target, _ := cmd.Flags().GetString("app")
+		if target == "" {
+			target = config.Defaults.Open
+		}
 
 		switch target {
 		case "finder", "f":
 			err = fmt.Errorf("finder: %w", exec.Command("open", path).Run())
 		case "terminal", "t":
 			err = fmt.Errorf("terminal: %w", exec.Command("open", "-a", "Terminal", path).Run())
-		case "zed", "z":
-			err = fmt.Errorf("zed: %w", exec.Command("zed", path).Run())
+		case "editor", "e":
+			err = fmt.Errorf("%s: %w", config.Editor, exec.Command(config.Editor, path).Run())
+			target = config.Editor
 		default:
 			return fmt.Errorf("unknown target: %s", target)
 		}
@@ -44,13 +48,13 @@ var openCmd = &cobra.Command{
 		// Turns the first character to uppercase
 		targetToCapital := func() string { str := []rune(target); return strings.ToUpper(string(str[0])) + string(str[1:]) }()
 
-		fmt.Printf("Opened project: %s, in %s\n", name, targetToCapital)
+		fmt.Printf("Opened project: \"%s\" in %s\n", name, targetToCapital)
 
 		return nil
 	},
 }
 
 func init() {
-	openCmd.Flags().StringP("app", "a", "finder", "--app <platform/target>")
+	openCmd.Flags().StringP("app", "a", "", "--app <platform/target>")
 	rootCmd.AddCommand(openCmd)
 }

@@ -16,7 +16,6 @@ var add = &cobra.Command{
 	Use:   "add <name> <tag>",
 	Short: "Add a new project",
 	Long:  `Add a new project to the project list`,
-	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
@@ -26,7 +25,7 @@ var add = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		projectPath := config.ProjectFolderPath + "/" + name
+		projectPath := config.ProjectPath() + "/" + name
 		err = os.Mkdir(projectPath, 0755)
 
 		if err != nil {
@@ -35,7 +34,13 @@ var add = &cobra.Command{
 
 		fmt.Println("Project created at:", projectPath)
 
-		if err := lib.SetTag(projectPath, args[1]); err != nil {
+		if len(args) >= 2 {
+			if err := lib.SetTag(projectPath, args[1]); err != nil {
+				return fmt.Errorf("Error adding tag: %w", err)
+			}
+		}
+
+		if err := lib.SetTag(projectPath, config.Defaults.Tag); err != nil {
 			return fmt.Errorf("Error adding tag: %w", err)
 		}
 

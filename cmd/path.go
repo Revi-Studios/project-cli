@@ -19,7 +19,7 @@ var pathCmd = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		fmt.Println(config.ProjectFolderPath)
+		fmt.Println(config.ProjectPath())
 		return nil
 	},
 }
@@ -36,7 +36,7 @@ var pathSetCmd = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		config.ProjectFolderPath = args[0]
+		config.Projects.Path = args[0]
 
 		if err := lib.SaveConfig(config); err != nil {
 			return fmt.Errorf("saving config file: %w", err)
@@ -48,7 +48,7 @@ var pathSetCmd = &cobra.Command{
 			return fmt.Errorf("getting the config after saving it: %w", err)
 		}
 
-		fmt.Println("Project folder path set to:", config.ProjectFolderPath)
+		fmt.Println("Project folder path set to:", config.ProjectPath())
 
 		return nil
 	},

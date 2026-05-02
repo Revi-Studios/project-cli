@@ -25,7 +25,7 @@ var remove = &cobra.Command{
 		}
 
 		name := args[0]
-		path := config.ProjectFolderPath + "/" + name
+		path := config.ProjectPath() + "/" + name
 
 		if err = exec.Command("trash", path).Run(); err != nil {
 			return fmt.Errorf("running 'trash %v': %w", path, err)

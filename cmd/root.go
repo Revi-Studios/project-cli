@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		err = lib.OpenFolder(config.ProjectFolderPath)
+		err = lib.OpenFolder(config.ProjectPath())
 		if err != nil {
 			return fmt.Errorf("Faild to open the project folder: %w", err)
 		}

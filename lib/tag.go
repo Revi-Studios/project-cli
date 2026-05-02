@@ -29,6 +29,9 @@ func GetTags(path string) (string, error) {
 }
 
 func SetTag(path, tag string) error {
+	if tag == "" {
+		return nil
+	}
 	var buf bytes.Buffer
 
 	plist.NewEncoder(&buf).Encode([]string{tag})
