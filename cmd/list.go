@@ -187,7 +187,7 @@ var listCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Println(strings.Repeat("-", viewW*width/2-4), "Projects:", strings.Repeat("-", viewW*width/2-5))
+			fmt.Println(strings.Repeat("-", viewW*width/2-5), "Projects:", strings.Repeat("-", viewW*width/2-6))
 			fmt.Println(renderBuilder.String())
 
 		case "category", "c":
@@ -323,7 +323,6 @@ func renderGrid(bitMap uint64, viewW, width, height int, renderBuf map[int]strin
 
 		time.Sleep(100 * time.Millisecond)
 	}
-*/
 func reverse(s string) string {
 	r := []rune(s)
 	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
@@ -331,3 +330,4 @@ func reverse(s string) string {
 	}
 	return string(r)
 }
+*/
