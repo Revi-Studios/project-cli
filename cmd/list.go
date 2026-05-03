@@ -15,10 +15,6 @@ import (
 	"golang.org/x/term"
 )
 
-func init() {
-	rootCmd.AddCommand(listCmd)
-}
-
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all projects",
@@ -271,6 +267,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
+// Functions
 func getBit(bitMap *uint64, index int) int {
 	return int((*bitMap >> index) & 1)
 }
