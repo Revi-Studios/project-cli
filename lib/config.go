@@ -26,6 +26,11 @@ func GetConfig() (Config, error) {
 	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
 		return Config{}, fmt.Errorf("reading config file: %w", err)
 	}
+
+	if config == (Config{}) {
+		return Config{}, fmt.Errorf("config file doesn't have any settings")
+	}
+
 	return config, nil
 }
 

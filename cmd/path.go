@@ -32,7 +32,7 @@ var pathSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := lib.GetConfig()
 
-		if err != nil {
+		if err != nil && err.Error() != "config file doesn't have any settings" {
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
@@ -42,13 +42,7 @@ var pathSetCmd = &cobra.Command{
 			return fmt.Errorf("saving config file: %w", err)
 		}
 
-		config, err = lib.GetConfig()
-
-		if err != nil {
-			return fmt.Errorf("getting the config after saving it: %w", err)
-		}
-
-		fmt.Println("Project folder path set to:", config.ProjectFolderPath)
+		fmt.Println("Project path set:", config.ProjectFolderPath)
 
 		return nil
 	},
