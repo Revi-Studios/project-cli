@@ -2,7 +2,6 @@ package lib
 
 import (
 	"os"
-	"strings"
 )
 
 // Appending :tags creates an alternate data stream in NTFS

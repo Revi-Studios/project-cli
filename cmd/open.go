@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/Revi-Studios/project/lib"
@@ -26,18 +24,9 @@ var openCmd = &cobra.Command{
 
 		target, _ := cmd.Flags().GetString("app")
 
-		switch target {
-		case "finder", "f":
-			err = fmt.Errorf("finder: %w", exec.Command("open", path).Run())
-		case "terminal", "t":
-			err = fmt.Errorf("terminal: %w", exec.Command("open", "-a", "Terminal", path).Run())
-		case "zed", "z":
-			err = fmt.Errorf("zed: %w", exec.Command("zed", path).Run())
-		default:
-			return fmt.Errorf("unknown target: %s", target)
-		}
+		err = lib.OpenProject(path, target)
 
-		if errors.Unwrap(err) != nil {
+		if err != nil {
 			return fmt.Errorf("opening project %s: %w", name, err)
 		}
 
@@ -51,6 +40,6 @@ var openCmd = &cobra.Command{
 }
 
 func init() {
-	openCmd.Flags().StringP("app", "a", "finder", "--app <platform/target>")
+	openCmd.Flags().StringP("app", "a", "filemanager", "--app <platform/target>")
 	rootCmd.AddCommand(openCmd)
 }
