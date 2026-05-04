@@ -15,10 +15,6 @@ import (
 	"golang.org/x/term"
 )
 
-func init() {
-	rootCmd.AddCommand(listCmd)
-}
-
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all projects",
@@ -31,9 +27,27 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
-		files, err := os.ReadDir(config.ProjectPath() + "/")
+		folders, err := func() ([]os.DirEntry, error) {
+			files, err := os.ReadDir(config.ProjectPath() + "/")
+			if err != nil {
+				return nil, fmt.Errorf("reading the project directory: %w", err)
+			}
+			folders := make([]os.DirEntry, 0, len(files))
+			for _, file := range files {
+				if file.IsDir() {
+					folders = append(folders, file)
+				}
+			}
+			return folders, nil
+		}()
+
 		if err != nil {
-			return fmt.Errorf("reading the project directory: %w", err)
+			return fmt.Errorf("getting folders: %w", err)
+		}
+
+		if len(folders) == 0 {
+			fmt.Println("No projects found.")
+			return nil
 		}
 
 		os.Chdir(config.ProjectPath() + "/")
@@ -52,40 +66,38 @@ var listCmd = &cobra.Command{
 
 			// Format data
 			projectsMap := make(map[string][]string)
-			projectData := make(map[string][2]int)
-			for _, file := range files {
-				if file.IsDir() {
-					longestWordLength := 0
-					name := " - " + file.Name() + " "
-					tags, _ := lib.GetTags(file.Name())
-					tags = "[" + tags + "] "
+			projectData := make(map[string][2]int, len(folders))
+			for _, folder := range folders {
+				longestWordLength := 0
+				name := " - " + folder.Name() + " "
+				tags, _ := lib.GetTags(folder.Name())
+				tags = "[" + tags + "] "
 
-					// Adjusts the longest name if needed
-					if len := utf8.RuneCountInString(name); len > longestWordLength {
-						longestWordLength = len
-					}
-					if len := utf8.RuneCountInString(tags); len > longestWordLength {
-						longestWordLength = len
-					}
-
-					if tags == "[] " {
-						tags = "[Without Tags]"
-					}
-					if projectsMap[tags] == nil {
-						projectsMap[tags] = append(projectsMap[tags], tags)
-					}
-					projectsMap[tags] = append(projectsMap[tags], name)
-
-					// Project Data
-					data := projectData[tags]
-
-					data[1]++
-					if data[0] < longestWordLength {
-						data[0] = longestWordLength
-					}
-
-					projectData[tags] = data
+				// Adjusts the longest name if needed
+				if len := utf8.RuneCountInString(name); len > longestWordLength {
+					longestWordLength = len
 				}
+				if len := utf8.RuneCountInString(tags); len > longestWordLength {
+					longestWordLength = len
+				}
+
+				if tags == "[] " {
+					tags = "[Without Tags]"
+				}
+				if projectsMap[tags] == nil {
+					projectsMap[tags] = append(projectsMap[tags], tags)
+				}
+				projectsMap[tags] = append(projectsMap[tags], name)
+
+				// Project Data
+				data := projectData[tags]
+
+				data[1]++
+				if data[0] < longestWordLength {
+					data[0] = longestWordLength
+				}
+
+				projectData[tags] = data
 			}
 
 			// Calculate default box size
@@ -190,31 +202,27 @@ var listCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Println(strings.Repeat("-", viewW*width/2-4), "Projects:", strings.Repeat("-", viewW*width/2-5))
+			fmt.Println(strings.Repeat("-", viewW*width/2-5), "Projects:", strings.Repeat("-", viewW*width/2-6))
 			fmt.Println(renderBuilder.String())
 
 		case "category", "c":
 			projectsMap := make(map[string][]string)
-			for _, file := range files {
-				if file.IsDir() {
+			for _, folder := range folders {
+				name := folder.Name()
+				tags, _ := lib.GetTags(name)
 
-					name := file.Name()
-					tags, _ := lib.GetTags(name)
-
-					// Adjusts the longest names if needed
-					if len := utf8.RuneCountInString(name); len > longestFileName {
-						longestFileName = len
-					}
-					if len := utf8.RuneCountInString(tags); len > longestTagName {
-						longestTagName = len
-					}
-
-					if tags == "" {
-						tags = "[Without Tags]"
-					}
-					projectsMap[tags] = append(projectsMap[tags], name)
-
+				// Adjusts the longest names if needed
+				if len := utf8.RuneCountInString(name); len > longestFileName {
+					longestFileName = len
 				}
+				if len := utf8.RuneCountInString(tags); len > longestTagName {
+					longestTagName = len
+				}
+
+				if tags == "" {
+					tags = "[Without Tags]"
+				}
+				projectsMap[tags] = append(projectsMap[tags], name)
 			}
 			fmt.Println(strings.Repeat("-", 3), "Projects:", strings.Repeat("-", longestTagName+longestFileName-8))
 			for category, prjs := range projectsMap {
@@ -227,22 +235,19 @@ var listCmd = &cobra.Command{
 			fmt.Println(strings.Repeat("-", longestFileName+longestTagName+7))
 
 		default:
-			projects := make([][2]string, len(files))
-			for i, file := range files {
-				if file.IsDir() {
-					name := file.Name()
-					tags, err := lib.GetTags(name)
-					if err != nil {
-					}
-					if len := utf8.RuneCountInString(name); len > longestFileName {
-						longestFileName = len
-					}
-					if len := utf8.RuneCountInString(tags); len > longestTagName {
-						longestTagName = len
-					}
-					projects[i] = [2]string{name, tags}
-
+			projects := make([][2]string, len(folders))
+			for i, folder := range folders {
+				name := folder.Name()
+				tags, err := lib.GetTags(name)
+				if err != nil {
 				}
+				if len := utf8.RuneCountInString(name); len > longestFileName {
+					longestFileName = len
+				}
+				if len := utf8.RuneCountInString(tags); len > longestTagName {
+					longestTagName = len
+				}
+				projects[i] = [2]string{name, tags}
 			}
 			fmt.Println(strings.Repeat("-", longestFileName-2), "Projects:", strings.Repeat("-", longestTagName-2))
 			for _, prj := range projects {
@@ -265,6 +270,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
+// Functions
 func getBit(bitMap *uint64, index int) int {
 	return int((*bitMap >> index) & 1)
 }
@@ -326,7 +332,6 @@ func renderGrid(bitMap uint64, viewW, width, height int, renderBuf map[int]strin
 
 		time.Sleep(100 * time.Millisecond)
 	}
-*/
 func reverse(s string) string {
 	r := []rune(s)
 	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
@@ -334,3 +339,4 @@ func reverse(s string) string {
 	}
 	return string(r)
 }
+*/

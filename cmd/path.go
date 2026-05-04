@@ -32,7 +32,7 @@ var pathSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := lib.GetConfig()
 
-		if err != nil {
+		if err != nil && err.Error() != "config file doesn't have any settings" {
 			return fmt.Errorf("getting the config: %w", err)
 		}
 
