@@ -13,13 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "",
 	Long:  `Base command. If another command isn't added, it opens the project folder.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := lib.GetConfig()
-
-		if err != nil {
-			return fmt.Errorf("getting the config: %w", err)
-		}
-
-		err = lib.OpenFolder(config.ProjectPath())
+		err := lib.OpenFolder(lib.Config.ProjectPath())
 		if err != nil {
 			return fmt.Errorf("Faild to open the project folder: %w", err)
 		}

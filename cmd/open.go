@@ -22,7 +22,7 @@ var openCmd = &cobra.Command{
 		}
 
 		name := args[0]
-		path := config.ProjectPath() + "/" + name + "/"
+		path := lib.Config.ProjectPath() + "/" + name + "/"
 
 		target, _ := cmd.Flags().GetString("app")
 		if target == "" {

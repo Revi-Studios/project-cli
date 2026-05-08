@@ -13,13 +13,7 @@ var pathCmd = &cobra.Command{
 	Long:  "Show the path to the project folder",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := lib.GetConfig()
-
-		if err != nil {
-			return fmt.Errorf("getting the config: %w", err)
-		}
-
-		fmt.Println(config.ProjectPath())
+		fmt.Println(lib.Config.ProjectPath())
 		return nil
 	},
 }
@@ -48,7 +42,7 @@ var pathSetCmd = &cobra.Command{
 			return fmt.Errorf("getting the config after saving it: %w", err)
 		}
 
-		fmt.Println("Project folder path set to:", config.ProjectPath())
+		fmt.Println("Project folder path set to:", lib.Config.ProjectPath())
 
 		return nil
 	},

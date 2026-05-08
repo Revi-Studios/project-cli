@@ -8,9 +8,21 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+var Config *ConfigStruct
+
+func init() {
+	config, err := GetConfig()
+	if err != nil {
+		err = fmt.Errorf("getting the config: %w", err)
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	Config = config
+}
+
 var ConfigPath = getConfigPath()
 
-type Config struct {
+type ConfigStruct struct {
 	Debug    bool     `toml:"debug"`
 	Editor   string   `toml:"editor"`
 	Projects Projects `toml:"projects"`
@@ -28,7 +40,7 @@ type Defaults struct {
 	Open string `toml:"open"`
 }
 
-func (this *Config) ProjectPath() string {
+func (this *ConfigStruct) ProjectPath() string {
 	if this.Debug {
 		return this.Projects.DebugPath
 	}
@@ -36,25 +48,25 @@ func (this *Config) ProjectPath() string {
 }
 
 // Loads and returns the config from the config file
-func GetConfig() (*Config, error) {
+func GetConfig() (*ConfigStruct, error) {
 	if err := validateConfigFile(); err != nil {
 		return nil, fmt.Errorf("validating the config: %w", err)
 	}
-	var config *Config
+	var config ConfigStruct
 
 	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
 		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
-	if *config == (Config{}) {
+	if config == (ConfigStruct{}) {
 		return nil, fmt.Errorf("config file doesn't have any settings")
 	}
 
-	return config, nil
+	return &config, nil
 }
 
 // Saves the config to the config file
-func SaveConfig(config *Config) error {
+func SaveConfig(config *ConfigStruct) error {
 	validateConfigFile()
 	conf, err := os.OpenFile(ConfigPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {

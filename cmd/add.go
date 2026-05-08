@@ -19,14 +19,8 @@ var add = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
-		config, err := lib.GetConfig()
-
-		if err != nil {
-			return fmt.Errorf("getting the config: %w", err)
-		}
-
-		projectPath := config.ProjectPath() + "/" + name
-		err = os.Mkdir(projectPath, 0755)
+		projectPath := lib.Config.ProjectPath() + "/" + name
+		err := os.Mkdir(projectPath, 0755)
 
 		if err != nil {
 			return fmt.Errorf("creating the directory: %w", err)
@@ -40,7 +34,7 @@ var add = &cobra.Command{
 			}
 		}
 
-		if err := lib.SetTag(projectPath, config.Defaults.Tag); err != nil {
+		if err := lib.SetTag(projectPath, lib.Config.Defaults.Tag); err != nil {
 			return fmt.Errorf("Error adding tag: %w", err)
 		}
 

@@ -28,7 +28,7 @@ var listCmd = &cobra.Command{
 		}
 
 		folders, err := func() ([]os.DirEntry, error) {
-			files, err := os.ReadDir(config.ProjectPath() + "/")
+			files, err := os.ReadDir(lib.Config.ProjectPath() + "/")
 			if err != nil {
 				return nil, fmt.Errorf("reading the project directory: %w", err)
 			}
@@ -50,7 +50,7 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		os.Chdir(config.ProjectPath() + "/")
+		os.Chdir(lib.Config.ProjectPath() + "/")
 
 		var longestFileName int
 		var longestTagName int
