@@ -32,8 +32,10 @@ var openCmd = &cobra.Command{
 		switch target {
 		case "finder", "f":
 			err = fmt.Errorf("finder: %w", exec.Command("open", path).Run())
+			target = "Finder"
 		case "terminal", "t":
 			err = fmt.Errorf("terminal: %w", exec.Command("open", "-a", "Terminal", path).Run())
+			target = "Terminal"
 		case "editor", "e":
 			err = fmt.Errorf("%s: %w", config.Editor, exec.Command(config.Editor, path).Run())
 			target = config.Editor
