@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"time"
 
 	"os"
 	"strconv"
@@ -159,7 +160,9 @@ var listCmd = &cobra.Command{
 
 										renderBuf[((index+1)/viewW)*viewW*(height-1)+index+i*viewW+column] = str
 
-										// renderGrid(bitMap, viewW, width, height, renderBuf)
+										if lib.Config.Debug {
+											renderGrid(bitMap, viewW, width, height, renderBuf)
+										}
 									}
 								}
 
@@ -173,6 +176,9 @@ var listCmd = &cobra.Command{
 				}
 
 				index++
+			}
+			if lib.Config.Debug {
+				return nil
 			}
 
 			var renderBuilder = strings.Builder{}
@@ -290,45 +296,45 @@ func insertBlockIntoBitMap(bitMap *uint64, block [2]int, rowLength, index int) {
 	}
 }
 
-/*
 func renderGrid(bitMap uint64, viewW, width, height int, renderBuf map[int]string) {
 
-		var renderBuilder = strings.Builder{}
-		renderBuilder.Grow(viewW * height * viewW)
+	var renderBuilder = strings.Builder{}
+	renderBuilder.Grow(viewW * height * viewW)
 
-		// Writing every string piece to the renderBuilder for string building
-		for i := range len(strconv.FormatUint(bitMap, 2)) * height {
-			var str string
+	// Writing every string piece to the renderBuilder for string building
+	for i := range len(strconv.FormatUint(bitMap, 2)) * height {
+		var str string
 
-			switch true {
-			case renderBuf[i] != "":
-				str = renderBuf[i]
-			default:
-				str = strings.Repeat(" ", width)
-			}
-
-			renderBuilder.WriteString(str)
-
-			if (i+1)%viewW == 0 {
-				renderBuilder.WriteString("\n")
-			}
-		}
-		fmt.Printf("\033[H")
-		// Print the renderd string
-		fmt.Println(renderBuilder.String())
-
-		fmt.Println("Info:", width, height, viewW)
-		fmt.Println("[bitMap]", strings.Repeat(" ", viewW*2))
-		for i, char := range reverse(strconv.FormatUint(bitMap, 2)) {
-			fmt.Printf("|%c", char)
-			// Check if we've reached the end of a row
-			if (i+1)%viewW == 0 {
-				fmt.Print("\n")
-			}
+		switch true {
+		case renderBuf[i] != "":
+			str = renderBuf[i]
+		default:
+			str = strings.Repeat(" ", width)
 		}
 
-		time.Sleep(100 * time.Millisecond)
+		renderBuilder.WriteString(str)
+
+		if (i+1)%viewW == 0 {
+			renderBuilder.WriteString("\n")
+		}
 	}
+	fmt.Printf("\033[H")
+	// Print the renderd string
+	fmt.Println(renderBuilder.String())
+
+	fmt.Println("Info:", width, height, viewW, strings.Repeat(" ", viewW*2))
+	fmt.Println("[bitMap]", strings.Repeat(" ", viewW*2))
+	for i, char := range reverse(strconv.FormatUint(bitMap, 2)) {
+		fmt.Printf("|%c", char)
+		// Check if we've reached the end of a row
+		if (i+1)%viewW == 0 {
+			fmt.Print("\n")
+		}
+	}
+
+	time.Sleep(500 * time.Millisecond)
+}
+
 func reverse(s string) string {
 	r := []rune(s)
 	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
@@ -336,4 +342,3 @@ func reverse(s string) string {
 	}
 	return string(r)
 }
-*/
