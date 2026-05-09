@@ -21,12 +21,6 @@ var listCmd = &cobra.Command{
 	Long:  "List all projects",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := lib.GetConfig()
-
-		if err != nil {
-			return fmt.Errorf("getting the config: %w", err)
-		}
-
 		folders, err := func() ([]os.DirEntry, error) {
 			files, err := os.ReadDir(lib.Config.ProjectPath() + "/")
 			if err != nil {
@@ -57,7 +51,7 @@ var listCmd = &cobra.Command{
 
 		str, _ := cmd.Flags().GetString("view")
 		if str == "" {
-			str = config.Defaults.View
+			str = lib.Config.Defaults.View
 		}
 
 		switch str {
@@ -267,6 +261,9 @@ var listCmd = &cobra.Command{
 
 func init() {
 	listCmd.Flags().StringP("view", "v", "", "--view <view-type>")
+	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
+	})
 	rootCmd.AddCommand(listCmd)
 }
 

@@ -16,6 +16,16 @@ var add = &cobra.Command{
 	Use:   "add <name> <tag>",
 	Short: "Add a new project",
 	Long:  `Add a new project to the project list`,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		tags := make([]string, 0, len(lib.Config.Tags))
+		for _, tag := range lib.Config.Tags {
+			tags = append(tags, "\""+tag+"\"")
+		}
+		return tags, cobra.ShellCompDirectiveNoFileComp
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 

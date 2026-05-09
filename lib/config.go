@@ -14,7 +14,7 @@ func init() {
 	config, err := GetConfig()
 	if err != nil {
 		err = fmt.Errorf("getting the config: %w", err)
-		fmt.Println(err)
+		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 	Config = config
@@ -25,6 +25,7 @@ var ConfigPath = getConfigPath()
 type ConfigStruct struct {
 	Debug    bool     `toml:"debug"`
 	Editor   string   `toml:"editor"`
+	Tags     []string `toml:"tags"`
 	Projects Projects `toml:"projects"`
 	Defaults Defaults `toml:"defaults"`
 }
@@ -41,7 +42,7 @@ type Defaults struct {
 }
 
 func (this *ConfigStruct) ProjectPath() string {
-	if this.Debug {
+	if this.Debug && this.Projects.DebugPath != "" {
 		return this.Projects.DebugPath
 	}
 	return this.Projects.Path
@@ -52,17 +53,17 @@ func GetConfig() (*ConfigStruct, error) {
 	if err := validateConfigFile(); err != nil {
 		return nil, fmt.Errorf("validating the config: %w", err)
 	}
-	var config ConfigStruct
+	var config *ConfigStruct
 
 	if _, err := toml.DecodeFile(ConfigPath, &config); err != nil {
 		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
-	if config == (ConfigStruct{}) {
-		return nil, fmt.Errorf("config file doesn't have any settings")
+	if config.Projects.Path == "" {
+		return nil, fmt.Errorf("emty project path field")
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 // Saves the config to the config file
