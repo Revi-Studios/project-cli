@@ -23,11 +23,12 @@ func init() {
 var ConfigPath = getConfigPath()
 
 type ConfigStruct struct {
-	Debug    bool     `toml:"debug"`
-	Editor   string   `toml:"editor"`
-	Tags     []string `toml:"tags"`
-	Projects Projects `toml:"projects"`
-	Defaults Defaults `toml:"defaults"`
+	Debug      bool       `toml:"debug"`
+	Editor     string     `toml:"editor"`
+	Tags       []string   `toml:"tags"`
+	Projects   Projects   `toml:"projects"`
+	Defaults   Defaults   `toml:"defaults"`
+	Shorthands Shorthands `toml:"shorthands"`
 }
 
 type Projects struct {
@@ -41,11 +42,25 @@ type Defaults struct {
 	Open string `toml:"open"`
 }
 
+type Shorthands struct {
+	Tags     map[string]string `toml:"tags"`
+	Projects map[string]string `toml:"projects"`
+}
+
+// Returns the correct path relative to the debug toggle. If debug is true the debug_path is returned
 func (this *ConfigStruct) ProjectPath() string {
 	if this.Debug && this.Projects.DebugPath != "" {
 		return this.Projects.DebugPath
 	}
 	return this.Projects.Path
+}
+
+// Returns the tag the shorthands points to. If none was found it returns the shorthand back
+func (this Shorthands) Tag(shorthand string) string {
+	if t := this.Tags[shorthand]; t != "" {
+		return t
+	}
+	return shorthand
 }
 
 // Loads and returns the config from the config file

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/pkg/xattr"
@@ -28,15 +29,17 @@ func GetTags(path string) (string, error) {
 	return strings.Join(tags, ", "), nil
 }
 
-func SetTag(path, tag string) error {
-	if tag == "" {
+func SetTag(path string, tags ...string) error {
+	if len(tags) == 0 {
 		return nil
 	}
 	var buf bytes.Buffer
 
-	plist.NewEncoder(&buf).Encode([]string{tag})
+	if err := plist.NewEncoder(&buf).Encode(tags); err != nil {
+		return fmt.Errorf("failed to encode tags: %w", err)
+	}
 	if err := xattr.Set(path, attrname, buf.Bytes()); err != nil {
-		return err
+		return fmt.Errorf("failed to set tags: %w", err)
 	}
 	return nil
 }

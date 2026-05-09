@@ -26,6 +26,7 @@ var add = &cobra.Command{
 		}
 		return tags, cobra.ShellCompDirectiveNoFileComp
 	},
+	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
@@ -38,10 +39,15 @@ var add = &cobra.Command{
 
 		fmt.Println("Project created at:", projectPath)
 
-		if len(args) >= 2 {
-			if err := lib.SetTag(projectPath, args[1]); err != nil {
+		if len(args) > 1 {
+			tags := make([]string, 0, len(args)-1)
+			for _, tag := range args[1:] {
+				tags = append(tags, lib.Config.Shorthands.Tag(tag))
+			}
+			if err := lib.SetTag(projectPath, tags...); err != nil {
 				return fmt.Errorf("Error adding tag: %w", err)
 			}
+			return nil
 		}
 
 		if err := lib.SetTag(projectPath, lib.Config.Defaults.Tag); err != nil {
