@@ -63,6 +63,14 @@ func (this Shorthands) Tag(shorthand string) string {
 	return shorthand
 }
 
+// Returns the project the shorthands points to. If none was found it returns the shorthand back
+func (this Shorthands) Project(shorthand string) string {
+	if t := this.Projects[shorthand]; t != "" {
+		return t
+	}
+	return shorthand
+}
+
 // Loads and returns the config from the config file
 func GetConfig() (*ConfigStruct, error) {
 	if err := validateConfigFile(); err != nil {

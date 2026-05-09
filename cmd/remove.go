@@ -43,7 +43,7 @@ var remove = &cobra.Command{
 		return folders, cobra.ShellCompDirectiveNoFileComp
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := lib.Config.Shorthands.Project(args[0])
 		path := lib.Config.ProjectPath() + "/" + name
 
 		if err := exec.Command("trash", path).Run(); err != nil {

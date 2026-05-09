@@ -41,7 +41,7 @@ var openCmd = &cobra.Command{
 	Short: "Open a project",
 	Long:  "Open a project",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := lib.Config.Shorthands.Project(args[0])
 		path := lib.Config.ProjectPath() + "/" + name + "/"
 
 		target, _ := cmd.Flags().GetString("app")
