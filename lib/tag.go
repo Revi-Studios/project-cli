@@ -11,11 +11,11 @@ import (
 
 const attrname string = "com.apple.metadata:_kMDItemUserTags"
 
-func GetTags(path string) (string, error) {
+func GetTags(path string) ([]string, error) {
 
 	data, err := xattr.Get(path, attrname)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var tags []string
 	decoder := plist.NewDecoder(bytes.NewReader(data))
@@ -26,7 +26,7 @@ func GetTags(path string) (string, error) {
 		tags[i] = tag[0]
 	}
 
-	return strings.Join(tags, ", "), nil
+	return tags, nil
 }
 
 func SetTag(path string, tags ...string) error {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"slices"
 	"time"
 
 	"os"
@@ -22,6 +23,8 @@ var listCmd = &cobra.Command{
 	Long:  "List all projects",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		os.Chdir(lib.Config.ProjectPath() + "/")
+
 		folders, err := func() ([]os.DirEntry, error) {
 			files, err := os.ReadDir(lib.Config.ProjectPath() + "/")
 			if err != nil {
@@ -36,6 +39,26 @@ var listCmd = &cobra.Command{
 			return folders, nil
 		}()
 
+		filters, _ := cmd.Flags().GetStringSlice("filter")
+
+		if len(filters) != 0 {
+			for i, f := range filters {
+				filters[i] = lib.Config.Shorthands.Tag(f)
+			}
+
+			var filtered []os.DirEntry
+			for _, folder := range folders {
+				tags, _ := lib.GetTags(folder.Name())
+
+				for _, tag := range tags {
+					if slices.Contains(filters, lib.Config.Shorthands.Tag(tag)) {
+						filtered = append(filtered, folder)
+					}
+				}
+			}
+			folders = filtered
+		}
+
 		if err != nil {
 			return fmt.Errorf("getting folders: %w", err)
 		}
@@ -44,8 +67,6 @@ var listCmd = &cobra.Command{
 			fmt.Println("No projects found.")
 			return nil
 		}
-
-		os.Chdir(lib.Config.ProjectPath() + "/")
 
 		var longestFileName int
 		var longestTagName int
@@ -65,7 +86,8 @@ var listCmd = &cobra.Command{
 			for _, folder := range folders {
 				longestWordLength := 0
 				name := " - " + folder.Name() + " "
-				tags, _ := lib.GetTags(folder.Name())
+				tmp, _ := lib.GetTags(folder.Name())
+				tags := strings.Join(tmp, ", ")
 				tags = "[" + tags + "] "
 
 				// Adjusts the longest name if needed
@@ -209,7 +231,8 @@ var listCmd = &cobra.Command{
 			projectsMap := make(map[string][]string)
 			for _, folder := range folders {
 				name := folder.Name()
-				tags, _ := lib.GetTags(name)
+				tmp, _ := lib.GetTags(name)
+				tags := strings.Join(tmp, ", ")
 
 				// Adjusts the longest names if needed
 				if len := utf8.RuneCountInString(name); len > longestFileName {
@@ -238,9 +261,9 @@ var listCmd = &cobra.Command{
 			projects := make([][2]string, len(folders))
 			for i, folder := range folders {
 				name := folder.Name()
-				tags, err := lib.GetTags(name)
-				if err != nil {
-				}
+				tmp, _ := lib.GetTags(name)
+				tags := strings.Join(tmp, ", ")
+
 				if len := utf8.RuneCountInString(name); len > longestFileName {
 					longestFileName = len
 				}
@@ -267,8 +290,16 @@ var listCmd = &cobra.Command{
 
 func init() {
 	listCmd.Flags().StringP("view", "v", "", "--view <view-type>")
+	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
 	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
+	})
+	listCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		tags := make([]string, 0, len(lib.Config.Tags))
+		for _, tag := range lib.Config.Tags {
+			tags = append(tags, "\""+tag+"\"")
+		}
+		return tags, cobra.ShellCompDirectiveNoFileComp
 	})
 	rootCmd.AddCommand(listCmd)
 }
