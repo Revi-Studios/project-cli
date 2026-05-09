@@ -182,7 +182,7 @@ var listCmd = &cobra.Command{
 
 										renderBuf[((index+1)/viewW)*viewW*(height-1)+index+i*viewW+column] = str
 
-										if lib.Config.Debug {
+										if lib.Config.Debug && lib.Config.Debugger.SkipGrid == false {
 											renderGrid(bitMap, viewW, width, height, renderBuf)
 										}
 									}
@@ -199,7 +199,7 @@ var listCmd = &cobra.Command{
 
 				index++
 			}
-			if lib.Config.Debug {
+			if lib.Config.Debug && lib.Config.Debugger.SkipGrid == false {
 				return nil
 			}
 
@@ -272,7 +272,7 @@ var listCmd = &cobra.Command{
 				}
 				projects[i] = [2]string{name, tags}
 			}
-			fmt.Println(strings.Repeat("-", longestFileName-2), "Projects:", strings.Repeat("-", longestTagName-2))
+			fmt.Println(strings.Repeat("-", count(longestFileName-2)), "Projects:", strings.Repeat("-", count(longestTagName-2)))
 			for _, prj := range projects {
 				if prj == [2]string{"", ""} {
 					continue
@@ -372,4 +372,11 @@ func reverse(s string) string {
 		r[i], r[j] = r[j], r[i]
 	}
 	return string(r)
+}
+
+func count(n int) int {
+	if n < 0 {
+		return 0
+	}
+	return n
 }

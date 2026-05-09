@@ -29,6 +29,7 @@ type ConfigStruct struct {
 	Projects   Projects   `toml:"projects"`
 	Defaults   Defaults   `toml:"defaults"`
 	Shorthands Shorthands `toml:"shorthands"`
+	Debugger   Debugger   `toml:"debugger"`
 }
 
 type Projects struct {
@@ -47,9 +48,14 @@ type Shorthands struct {
 	Projects map[string]string `toml:"projects"`
 }
 
+type Debugger struct {
+	SkipGrid bool `toml:"skip_grid"`
+	SkipPath bool `toml:"skip_path"`
+}
+
 // Returns the correct path relative to the debug toggle. If debug is true the debug_path is returned
 func (this *ConfigStruct) ProjectPath() string {
-	if this.Debug && this.Projects.DebugPath != "" {
+	if this.Debug && this.Projects.DebugPath != "" && this.Debugger.SkipPath == false {
 		return this.Projects.DebugPath
 	}
 	return this.Projects.Path
