@@ -49,7 +49,7 @@ var listCmd = &cobra.Command{
 
 			var filtered []os.DirEntry
 			for _, folder := range folders {
-				tags, _ := lib.GetTags(folder.Name())
+				tags, _ := lib.GetSetTags(folder.Name())
 				if len(tags) == 0 {
 					tags = []string{"Without Tags"}
 				}
@@ -71,7 +71,7 @@ var listCmd = &cobra.Command{
 			var filtered []os.DirEntry
 		FolderFilter:
 			for _, folder := range folders {
-				tags, _ := lib.GetTags(folder.Name())
+				tags, _ := lib.GetSetTags(folder.Name())
 				if len(tags) == 0 {
 					tags = []string{"Without Tags"}
 				}
@@ -117,7 +117,7 @@ var listCmd = &cobra.Command{
 			for _, folder := range folders {
 				longestWordLength := 0
 				name := " - " + folder.Name() + " "
-				tmp, _ := lib.GetTags(folder.Name())
+				tmp, _ := lib.GetSetTags(folder.Name())
 				tags := strings.Join(tmp, ", ")
 				tags = "[" + tags + "] "
 
@@ -262,7 +262,7 @@ var listCmd = &cobra.Command{
 			projectsMap := make(map[string][]string)
 			for _, folder := range folders {
 				name := folder.Name()
-				tmp, _ := lib.GetTags(name)
+				tmp, _ := lib.GetSetTags(name)
 				tags := strings.Join(tmp, ", ")
 
 				// Adjusts the longest names if needed
@@ -292,7 +292,7 @@ var listCmd = &cobra.Command{
 			projects := make([][2]string, len(folders))
 			for i, folder := range folders {
 				name := folder.Name()
-				tmp, _ := lib.GetTags(name)
+				tmp, _ := lib.GetSetTags(name)
 				tags := strings.Join(tmp, ", ")
 
 				if len := utf8.RuneCountInString(name); len > longestFileName {

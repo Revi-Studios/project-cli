@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
+var untag bool
+
 func init() {
 	rootCmd.AddCommand(tag)
+	tag.Flags().BoolVarP(&untag, "untag", "u", false, "Untag the specified tag from the project")
 }
 
 var tag = &cobra.Command{
@@ -50,12 +54,66 @@ var tag = &cobra.Command{
 		name := lib.Config.Shorthands.Project(args[0])
 		path := filepath.Join(lib.Config.ProjectPath(), name)
 
-		tags := make([]string, 0, len(args)-1)
+		argTags := make([]string, 0, len(args)-1)
 		for _, tag := range args[1:] {
-			tags = append(tags, lib.Config.Shorthands.Tag(tag))
+			argTags = append(argTags, lib.Config.Shorthands.Tag(tag))
 		}
-		if err := lib.SetTag(path, tags...); err != nil {
-			return fmt.Errorf("adding tag: %w", err)
+
+		tags, err := lib.GetSetTags(path)
+
+		if err != nil {
+			return fmt.Errorf("reading existing tags: %w", err)
+		}
+
+		switch true {
+		// If it should untag
+		case untag && len(argTags) == 1:
+			filtered := make([]string, 0, len(tags))
+			for _, tag := range tags {
+				if tag != argTags[0] {
+					filtered = append(filtered, tag)
+				}
+			}
+
+			if err := lib.SetTags(path, filtered...); err != nil {
+				return fmt.Errorf("adding tag: %w", err)
+			}
+
+			fmt.Println("Removed tag:", argTags[0])
+
+		case untag:
+			rmTagsMap := make(map[string]struct{}, len(tags))
+			for _, tag := range argTags {
+				rmTagsMap[tag] = struct{}{}
+			}
+			filtered := make([]string, 0, len(tags))
+			for _, tag := range tags {
+				if _, found := rmTagsMap[tag]; !found {
+					filtered = append(filtered, tag)
+				}
+			}
+
+			if err := lib.SetTags(path, filtered...); err != nil {
+				return fmt.Errorf("adding tag: %w", err)
+			}
+
+			fmt.Println("Removed tags:", strings.Join(argTags, ", "))
+
+		// If there is only one tag to add
+		case len(argTags) == 1:
+			if err := lib.SetTags(path, append(argTags, tags...)...); err != nil {
+				return fmt.Errorf("adding tag: %w", err)
+			}
+
+			fmt.Println("Added tag:", argTags[0])
+
+		default:
+			if err := lib.SetTags(path, append(argTags, tags...)...); err != nil {
+				return fmt.Errorf("adding tag: %w", err)
+			}
+
+			fmt.Println("Added tags:", strings.Join(argTags, ", "))
+
 		}
 
 		return nil

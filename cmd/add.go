@@ -44,13 +44,13 @@ var add = &cobra.Command{
 			for _, tag := range args[1:] {
 				tags = append(tags, lib.Config.Shorthands.Tag(tag))
 			}
-			if err := lib.SetTag(projectPath, tags...); err != nil {
+			if err := lib.SetTags(projectPath, tags...); err != nil {
 				return fmt.Errorf("Error adding tag: %w", err)
 			}
 			return nil
 		}
 
-		if err := lib.SetTag(projectPath, lib.Config.Defaults.Tag); err != nil {
+		if err := lib.SetTags(projectPath, lib.Config.Defaults.Tag); err != nil {
 			return fmt.Errorf("Error adding tag: %w", err)
 		}
 
