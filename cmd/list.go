@@ -50,9 +50,12 @@ var listCmd = &cobra.Command{
 			var filtered []os.DirEntry
 			for _, folder := range folders {
 				tags, _ := lib.GetTags(folder.Name())
+				if len(tags) == 0 {
+					tags = []string{"Without Tags"}
+				}
 
 				for _, tag := range tags {
-					if slices.Contains(filters, lib.Config.Shorthands.Tag(tag)) {
+					if slices.Contains(filters, tag) {
 						filtered = append(filtered, folder)
 					}
 				}
@@ -69,9 +72,12 @@ var listCmd = &cobra.Command{
 		FolderFilter:
 			for _, folder := range folders {
 				tags, _ := lib.GetTags(folder.Name())
+				if len(tags) == 0 {
+					tags = []string{"Without Tags"}
+				}
 
 				for _, tag := range tags {
-					if slices.Contains(excludes, lib.Config.Shorthands.Tag(tag)) {
+					if slices.Contains(excludes, tag) {
 						continue FolderFilter
 					}
 				}
@@ -85,7 +91,7 @@ var listCmd = &cobra.Command{
 		}
 
 		switch true {
-		case len(filters) != 0 || len(excludes) != 0:
+		case len(folders) == 0 && (len(filters) != 0 || len(excludes) != 0):
 			fmt.Println("No matching projects found.")
 			return nil
 		case len(folders) == 0:
