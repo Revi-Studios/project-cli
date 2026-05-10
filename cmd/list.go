@@ -40,6 +40,7 @@ var listCmd = &cobra.Command{
 		}()
 
 		filters, _ := cmd.Flags().GetStringSlice("filter")
+		excludes, _ := cmd.Flags().GetStringSlice("exclude")
 
 		if len(filters) != 0 {
 			for i, f := range filters {
@@ -59,11 +60,35 @@ var listCmd = &cobra.Command{
 			folders = filtered
 		}
 
+		if len(excludes) != 0 {
+			for i, e := range excludes {
+				excludes[i] = lib.Config.Shorthands.Tag(e)
+			}
+
+			var filtered []os.DirEntry
+		FolderFilter:
+			for _, folder := range folders {
+				tags, _ := lib.GetTags(folder.Name())
+
+				for _, tag := range tags {
+					if slices.Contains(excludes, lib.Config.Shorthands.Tag(tag)) {
+						continue FolderFilter
+					}
+				}
+				filtered = append(filtered, folder)
+			}
+			folders = filtered
+		}
+
 		if err != nil {
 			return fmt.Errorf("getting folders: %w", err)
 		}
 
-		if len(folders) == 0 {
+		switch true {
+		case len(filters) != 0 || len(excludes) != 0:
+			fmt.Println("No matching projects found.")
+			return nil
+		case len(folders) == 0:
 			fmt.Println("No projects found.")
 			return nil
 		}
@@ -291,10 +316,18 @@ var listCmd = &cobra.Command{
 func init() {
 	listCmd.Flags().StringP("view", "v", "", "--view <view-type>")
 	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
+	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
 	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
 	})
 	listCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		tags := make([]string, 0, len(lib.Config.Tags))
+		for _, tag := range lib.Config.Tags {
+			tags = append(tags, "\""+tag+"\"")
+		}
+		return tags, cobra.ShellCompDirectiveNoFileComp
+	})
+	listCmd.RegisterFlagCompletionFunc("exlude", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		tags := make([]string, 0, len(lib.Config.Tags))
 		for _, tag := range lib.Config.Tags {
 			tags = append(tags, "\""+tag+"\"")
