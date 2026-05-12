@@ -20,8 +20,8 @@ func init() {
 var tag = &cobra.Command{
 	Use:   "tag <project> <tags>",
 	Short: "tag project",
-	Long:  "Add a tag to a project",
-	Args:  cobra.MinimumNArgs(2),
+	Long:  "Manage tags on a project",
+	Args:  cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 1 {
 			tags := make([]string, 0, len(lib.Config.Tags))
@@ -53,6 +53,17 @@ var tag = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := lib.Config.Shorthands.Project(args[0])
 		path := filepath.Join(lib.Config.ProjectPath(), name)
+
+		if len(args) == 1 {
+			tags, err := lib.GetSetTags(path)
+
+			if err != nil {
+				return fmt.Errorf("reading existing tags: %w", err)
+			}
+
+			fmt.Println(strings.Join(tags, ", "))
+			return nil
+		}
 
 		argTags := make([]string, 0, len(args)-1)
 		for _, tag := range args[1:] {
