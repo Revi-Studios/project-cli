@@ -41,50 +41,11 @@ var listCmd = &cobra.Command{
 
 		filters, _ := cmd.Flags().GetStringSlice("filter")
 		excludes, _ := cmd.Flags().GetStringSlice("exclude")
+		browses, _ := cmd.Flags().GetStringSlice("browse")
 
-		if len(filters) != 0 {
-			for i, f := range filters {
-				filters[i] = lib.Config.Shorthands.Tag(f)
-			}
-
-			var filtered []os.DirEntry
-			for _, folder := range folders {
-				tags, _ := lib.GetSetTags(folder.Name())
-				if len(tags) == 0 {
-					tags = []string{"Without Tags"}
-				}
-
-				for _, tag := range tags {
-					if slices.Contains(filters, tag) {
-						filtered = append(filtered, folder)
-					}
-				}
-			}
-			folders = filtered
-		}
-
-		if len(excludes) != 0 {
-			for i, e := range excludes {
-				excludes[i] = lib.Config.Shorthands.Tag(e)
-			}
-
-			var filtered []os.DirEntry
-		FolderFilter:
-			for _, folder := range folders {
-				tags, _ := lib.GetSetTags(folder.Name())
-				if len(tags) == 0 {
-					tags = []string{"Without Tags"}
-				}
-
-				for _, tag := range tags {
-					if slices.Contains(excludes, tag) {
-						continue FolderFilter
-					}
-				}
-				filtered = append(filtered, folder)
-			}
-			folders = filtered
-		}
+		filterFolders(&folders, filters)
+		excludeFolders(&folders, excludes)
+		browseFolders(&folders, browses)
 
 		if err != nil {
 			return fmt.Errorf("getting folders: %w", err)
@@ -244,6 +205,11 @@ var listCmd = &cobra.Command{
 				switch true {
 				case renderBuf[i] != "":
 					str = renderBuf[i]
+					if len(browses) != 0 {
+						for _, browse := range browses {
+							str = strings.ReplaceAll(str, browse, "\033[7m"+browse+"\033[0m")
+						}
+					}
 				default:
 					str = strings.Repeat(" ", width)
 				}
@@ -282,7 +248,16 @@ var listCmd = &cobra.Command{
 			for category, prjs := range projectsMap {
 				fmt.Println(category)
 				for _, prjname := range prjs {
-					fmt.Println(" -", prjname)
+					fmt.Println(" -", func() string {
+						if len(browses) != 0 {
+							str := prjname
+							for _, browse := range browses {
+								str = strings.ReplaceAll(str, browse, "\033[7m"+browse+"\033[0m")
+							}
+							return str
+						}
+						return prjname
+					}())
 				}
 				fmt.Println("")
 			}
@@ -309,7 +284,16 @@ var listCmd = &cobra.Command{
 					continue
 				}
 				strLeft := strings.Repeat(" ", longestFileName-utf8.RuneCountInString(prj[0]))
-				fmt.Println(prj[0], strLeft, "|", prj[1])
+				fmt.Println(func() string {
+					if len(browses) != 0 {
+						str := prj[0]
+						for _, browse := range browses {
+							str = strings.ReplaceAll(str, browse, "\033[7m"+browse+"\033[0m")
+						}
+						return str
+					}
+					return prj[0]
+				}(), strLeft, "|", prj[1])
 			}
 			fmt.Println(strings.Repeat("-", longestFileName+longestTagName+7))
 
@@ -323,6 +307,7 @@ func init() {
 	listCmd.Flags().StringP("view", "v", "", "--view <view-type>")
 	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
 	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
+	listCmd.Flags().StringSliceP("browse", "b", []string{}, "--browse <string>")
 	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
 	})
@@ -418,4 +403,81 @@ func count(n int) int {
 		return 0
 	}
 	return n
+}
+
+func filterFolders(folders *[]os.DirEntry, filters []string) {
+	if len(filters) == 0 {
+		return
+	}
+
+	for i, f := range filters {
+		filters[i] = lib.Config.Shorthands.Tag(f)
+	}
+
+	var filtered []os.DirEntry
+	for _, folder := range *folders {
+		tags, _ := lib.GetSetTags(folder.Name())
+		if len(tags) == 0 {
+			tags = []string{"Without Tags"}
+		}
+
+		for _, tag := range tags {
+			if slices.Contains(filters, tag) {
+				filtered = append(filtered, folder)
+			}
+		}
+	}
+	*folders = filtered
+}
+
+func excludeFolders(folders *[]os.DirEntry, excludes []string) {
+	if len(excludes) == 0 {
+		return
+	}
+
+	for i, e := range excludes {
+		excludes[i] = lib.Config.Shorthands.Tag(e)
+	}
+
+	var filtered []os.DirEntry
+FolderFilter:
+	for _, folder := range *folders {
+		tags, _ := lib.GetSetTags(folder.Name())
+		if len(tags) == 0 {
+			tags = []string{"Without Tags"}
+		}
+
+		for _, tag := range tags {
+			if slices.Contains(excludes, tag) {
+				continue FolderFilter
+			}
+		}
+		filtered = append(filtered, folder)
+	}
+	*folders = filtered
+}
+
+func browseFolders(folders *[]os.DirEntry, browses []string) {
+	if len(browses) == 0 {
+		return
+	}
+
+	var filtered []os.DirEntry
+
+	for _, folder := range *folders {
+		for _, str := range browses {
+			if strings.Contains(folder.Name(), str) {
+				filtered = append(filtered, folder)
+				break
+			}
+		}
+	}
+
+	if len(browses) == 1 {
+		fmt.Println("Search string:", strings.Join(browses, ", "))
+	} else {
+		fmt.Println("Search strings:", strings.Join(browses, ", "))
+	}
+
+	*folders = filtered
 }
