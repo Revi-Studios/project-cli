@@ -55,7 +55,7 @@ var tag = &cobra.Command{
 		path := filepath.Join(lib.Config.ProjectPath(), name)
 
 		if len(args) == 1 {
-			tags, err := lib.GetSetTags(path)
+			tags, err := lib.GetTags(path)
 
 			if err != nil {
 				return fmt.Errorf("reading existing tags: %w", err)
@@ -70,7 +70,7 @@ var tag = &cobra.Command{
 			argTags = append(argTags, lib.Config.Shorthands.Tag(tag))
 		}
 
-		tags, err := lib.GetSetTags(path)
+		tags, err := lib.GetTags(path)
 
 		if err != nil {
 			return fmt.Errorf("reading existing tags: %w", err)

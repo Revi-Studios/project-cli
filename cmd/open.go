@@ -53,24 +53,24 @@ var openCmd = &cobra.Command{
 
 		switch target {
 		case "finder", "f":
-			err = fmt.Errorf("finder: %w", exec.Command("open", path).Run())
+			err = exec.Command("open", path).Run()
 			target = "Finder"
 		case "terminal", "t":
-			err = fmt.Errorf("terminal: %w", exec.Command("open", "-a", "Terminal", path).Run())
+			err = exec.Command("open", "-a", "Terminal", path).Run()
 			target = "Terminal"
 		case "editor", "e":
 			if lib.Config.Editor == "" {
 				err = errors.New("editor: not set in config")
 				break
 			}
-			err = fmt.Errorf("%s: %w", lib.Config.Editor, exec.Command(lib.Config.Editor, path).Run())
+			err = exec.Command(lib.Config.Editor, path).Run()
 			target = lib.Config.Editor
 		default:
 			return fmt.Errorf("unknown target: %s", target)
 		}
 
 		if err != nil {
-			return fmt.Errorf("opening project %s: %w", name, err)
+			return fmt.Errorf("opening project '%s':"+target+"%w", name, err)
 		}
 
 		// Turns the first character to uppercase

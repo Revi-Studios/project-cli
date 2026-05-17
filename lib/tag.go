@@ -11,7 +11,7 @@ import (
 
 const attrname string = "com.apple.metadata:_kMDItemUserTags"
 
-func GetSetTags(path string) ([]string, error) {
+func GetTags(path string) ([]string, error) {
 
 	data, err := xattr.Get(path, attrname)
 	if err != nil {
