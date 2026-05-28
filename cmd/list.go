@@ -39,6 +39,10 @@ var listCmd = &cobra.Command{
 			return folders, nil
 		}()
 
+		if err != nil {
+			return fmt.Errorf("getting folders: %w", err)
+		}
+
 		filters, _ := cmd.Flags().GetStringSlice("filter")
 		excludes, _ := cmd.Flags().GetStringSlice("exclude")
 		browses, _ := cmd.Flags().GetStringSlice("browse")
@@ -46,10 +50,6 @@ var listCmd = &cobra.Command{
 		filterFolders(&folders, filters)
 		excludeFolders(&folders, excludes)
 		browseFolders(&folders, browses)
-
-		if err != nil {
-			return fmt.Errorf("getting folders: %w", err)
-		}
 
 		switch true {
 		case len(folders) == 0 && (len(filters) != 0 || len(excludes) != 0):
@@ -73,11 +73,12 @@ var listCmd = &cobra.Command{
 		case "grid", "g":
 
 			// Format data
-			projectsMap := make(map[string][]string)
+			projectsMap := make(map[string][]string, len(folders))
 			projectData := make(map[string][2]int, len(folders))
 			for _, folder := range folders {
 				longestWordLength := 0
 				name := " - " + folder.Name() + " "
+
 				tmp, _ := lib.GetTags(folder.Name())
 				tags := strings.Join(tmp, ", ")
 				tags = "[" + tags + "] "
@@ -278,7 +279,7 @@ var listCmd = &cobra.Command{
 				}
 				projects[i] = [2]string{name, tags}
 			}
-			fmt.Println(strings.Repeat("-", count(longestFileName-2)), "Projects:", strings.Repeat("-", count(longestTagName-2)))
+			fmt.Println(strings.Repeat("-", safeRepeat(longestFileName-2)), "Projects:", strings.Repeat("-", safeRepeat(longestTagName-2)))
 			for _, prj := range projects {
 				if prj == [2]string{"", ""} {
 					continue
@@ -398,7 +399,7 @@ func reverse(s string) string {
 	return string(r)
 }
 
-func count(n int) int {
+func safeRepeat(n int) int {
 	if n < 0 {
 		return 0
 	}
