@@ -22,7 +22,7 @@ For this step you need to have [The Go Programming Language](https://go.dev/) in
 Then just run the command in your terminal:
 
 ```
-go install https://github.com/Revi-Studios/project-cli
+go install github.com/Revi-Studios/project-cli
 ```
 
 This will get the code from this repository and install it to your path.
