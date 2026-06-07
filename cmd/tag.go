@@ -14,11 +14,11 @@ var untag bool
 
 func init() {
 	rootCmd.AddCommand(tag)
-	tag.Flags().BoolVarP(&untag, "untag", "u", false, "Untag the specified tag from the project")
+	tag.Flags().BoolVarP(&untag, "untag", "u", false, "Untag one or multiple tags from a project")
 }
 
 var tag = &cobra.Command{
-	Use:   "tag <project> <tags>",
+	Use:   "tag <project> <tags> [flags]",
 	Short: "tag project",
 	Long:  "Manage tags on a project",
 	Args:  cobra.MinimumNArgs(1),

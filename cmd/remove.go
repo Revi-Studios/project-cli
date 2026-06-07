@@ -14,8 +14,8 @@ func init() {
 }
 
 var remove = &cobra.Command{
-	Use:   "remove <name>",
-	Short: "Remove a project",
+	Use:   "remove <project>",
+	Short: "Delete a project",
 	Long:  "Remove a project",
 	Args:  cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

@@ -18,9 +18,9 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all projects",
-	Long:  "List all projects",
+	Use:   "list [flags]",
+	Short: "List projects",
+	Long:  "Filter different types of projects and list them",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		os.Chdir(lib.Config.ProjectPath() + "/")
