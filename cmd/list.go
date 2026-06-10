@@ -474,11 +474,5 @@ func browseFolders(folders *[]os.DirEntry, browses []string) {
 		}
 	}
 
-	if len(browses) == 1 {
-		fmt.Println("Search string:", strings.Join(browses, ", "))
-	} else {
-		fmt.Println("Search strings:", strings.Join(browses, ", "))
-	}
-
 	*folders = filtered
 }
