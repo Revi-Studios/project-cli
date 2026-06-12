@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
@@ -62,6 +63,15 @@ var quick = &cobra.Command{
 		quick.RenderUI()
 
 		buf := make([]byte, 3)
+		sigChan := make(chan os.Signal, 1)
+
+		signal.Notify(sigChan, syscall.SIGWINCH)
+
+		go func() {
+			for range sigChan {
+				quick.RenderUI()
+			}
+		}()
 
 		for {
 
