@@ -57,7 +57,7 @@ var quick = &cobra.Command{
 		// quick.browses = []string{"l"}
 		quick.filter()
 
-		fmt.Print("\033[?1049h\033[?25l")
+		fmt.Print("\033[?1049h\033[?25l\033[H")
 		defer fmt.Print("\033[?1049l\033[?25h")
 
 		quick.RenderUI()
