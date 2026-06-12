@@ -189,6 +189,12 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 			builder.WriteString(" > \033[7m")
 			builder.WriteString(folder.Name())
 			builder.WriteString("\033[0m")
+			if len(tags) > 0 {
+				builder.WriteString(strings.Repeat(" ", 8))
+				builder.WriteString("\033[90m[")
+				builder.WriteString(tags_str)
+				builder.WriteString("]\033[0m")
+			}
 			builder.WriteString("\n\r")
 		} else {
 			builder.WriteString("   ")
