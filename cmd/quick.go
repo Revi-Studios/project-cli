@@ -82,21 +82,25 @@ var quick = &cobra.Command{
 
 			if numRead == 3 && buf[0] == 27 && buf[1] == 91 {
 				switch buf[2] {
-				case 65:
+				case 'A': // 65
 					if quick.selection <= 0 {
 						quick.selection = len(*quick.f_folders)
 					}
 					quick.selection--
 
 					quick.RenderUI()
-					// renderQuick(f_folders, quick.selection, filters, -1, &last_render_height)
-					// fmt.Println(fmt.Sprintf("\033[%dA\r", len(*f_folders)+1), renderListWithSelection(f_folders, quick.selection))
-				case 66:
+				case 'B': // 66
 					quick.selection++
 					if quick.selection >= len(*quick.f_folders) {
 						quick.selection = 0
 					}
-					quick.RenderUI() // renderQuick(f_folders, quick.selection, filters, -1, &last_render_height) // fmt.Println(fmt.Sprintf("\033[%dA\r", len(*f_folders)+1), renderListWithSelection(f_folders, quick.selection))
+					quick.RenderUI()
+				case 'C': // 67
+					quick.selection += min(quick.list_length, len(*quick.f_folders)-1-quick.selection)
+					quick.RenderUI()
+				case 'D': // 68
+					quick.selection -= min(quick.list_length, quick.selection)
+					quick.RenderUI()
 				}
 			} else if numRead == 1 {
 				// Handle Single Keypresses
@@ -135,6 +139,8 @@ type Quick struct {
 
 	last_height int
 	left_space  int // How many rows are left before the terminal size is used up
+
+	list_length int
 }
 
 // Filters the folders with filters, excludes and browses and puts the result in f_folder
@@ -188,6 +194,8 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 	avgW := 0
 	folders := 0
 
+	quick.list_length = min(space, len(*quick.f_folders))
+
 	builder.WriteString("\r")
 
 	for i, folder := range (*quick.f_folders)[(quick.selection/space)*space : min((quick.selection/space)*space+space, len(*quick.f_folders))] {
@@ -216,12 +224,22 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 
 	if !(len(*quick.f_folders) <= space) {
 		avgW /= folders
+		left_margin := avgW/2 + 5
 
-		builder.WriteString(strings.Repeat(" ", avgW/2+5))
-		// builder.WriteString("[" + strconv.Itoa((quick.selection / space)) + ":" + strconv.Itoa((quick.selection % len(*quick.f_folders))) + "]")
-		builder.WriteString(strconv.Itoa((quick.selection/space)+1) + "/" + strconv.Itoa(((len(*quick.f_folders) / space) + 1)))
-		if ((quick.selection/space)+1)*space <= len(*quick.f_folders) {
+		str := strconv.Itoa((quick.selection/space)+1) + "/" + strconv.Itoa((len(*quick.f_folders)-1)/space+1)
+
+		switch true {
+		case quick.selection/space == 0:
+			builder.WriteString(strings.Repeat(" ", left_margin))
+			builder.WriteString(str)
 			builder.WriteString(" >")
+		case (quick.selection / space) == (len(*quick.f_folders)-1)/space:
+			builder.WriteString(strings.Repeat(" ", left_margin-2))
+			builder.WriteString("< ")
+			builder.WriteString(str)
+		default:
+			builder.WriteString(strings.Repeat(" ", left_margin))
+			builder.WriteString(str)
 		}
 	}
 }
