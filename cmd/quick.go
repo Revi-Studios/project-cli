@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
-	"path"
 	"strconv"
 	"strings"
 	"syscall"
@@ -129,7 +127,7 @@ var quick = &cobra.Command{
 				case 'm', 'M':
 					quick.selection = min((quick.selection/quick.last_list_length)*quick.last_list_length+(quick.last_list_length-1)/2, len(*quick.f_folders)-1)
 					quick.RenderUI()
-				case 's', 'S':
+				case 's', 'S', ':':
 					quick.InitSearch()
 				}
 			}
@@ -158,6 +156,9 @@ type Quick struct {
 	excludes []string
 	browses  []string
 
+	render_filters bool
+	render_help    bool
+
 	last_height      int
 	last_list_length int
 	left_space       int // How many rows are left before the terminal size is used up
@@ -169,7 +170,6 @@ type Quick struct {
 func (quick *Quick) filter() {
 	*quick.f_folders = *quick.folders
 
-	browseFolders(quick.f_folders, quick.browses)
 	filterFolders(quick.f_folders, quick.filters)
 	excludeFolders(quick.f_folders, quick.excludes)
 	browseFolders(quick.f_folders, quick.browses)
@@ -199,14 +199,48 @@ func (quick *Quick) getFreeSpace(builder *strings.Builder) int {
 	return height
 }
 
-func (quick *Quick) renderTextInput(builder *strings.Builder) {
-	builder.WriteString("\rFilters: ")
-	builder.WriteString("\x1b[3;94m" + strings.Join(quick.filters, "\x1b[0m, \x1b[3;94m") + "\x1b[0m\n\r")
-	builder.WriteString("Excludes: ")
-	builder.WriteString("\x1b[3;90m" + strings.Join(quick.excludes, "\x1b[0m, \x1b[3;2m") + "\x1b[0m\n\n\r")
-	builder.WriteString("Search: \x1b[4;m l f:\x1b[94mgo\x1b[0m,\x1b[94mrust\x1b[0m e:\x1b[94mweb\x1b[0m\n\n\r")
-	builder.WriteString(strings.Repeat("-", 20))
-	builder.WriteString("\n")
+func (quick *Quick) renderHelp(builder *strings.Builder) {
+	builder.WriteString("\r")
+
+	builder.WriteString("* Help Message:\n\r")
+	builder.WriteString("* :h -> Show this help message.\n\r")
+	builder.WriteString("* :a -> Show all the active filtering.\n\r")
+	builder.WriteString("*\n\r")
+	builder.WriteString("* :f -> Adds filters.\n\r")
+	builder.WriteString("* :e -> Adds excludes.\n\r")
+	builder.WriteString("* :b -> Adds browses.\n\r")
+	builder.WriteString("*\n\r")
+	builder.WriteString("* :f:c -> Clears filters.\n\r")
+	builder.WriteString("* :e:c -> Clears excludes.\n\r")
+	builder.WriteString("* :b:c -> Clears browses.\n\r")
+	builder.WriteString("*\n\r")
+	builder.WriteString("* :c -> Clears all filterings.\n\r")
+
+	builder.WriteString("\n\r")
+}
+
+func (quick *Quick) renderFilters(builder *strings.Builder) {
+	builder.WriteString("\r")
+
+	builder.WriteString("* Filters: [\x1b[94m")
+	builder.WriteString(strings.Join(quick.filters, "\x1b[0m, \x1b[94m"))
+	builder.WriteString("\x1b[0m]\n\r")
+
+	builder.WriteString("* Excludes: [\x1b[94m")
+	builder.WriteString(strings.Join(quick.excludes, "\x1b[0m, \x1b[94m"))
+	builder.WriteString("\x1b[0m]\n\r")
+
+	builder.WriteString("* Browses: [")
+	if len(quick.browses) > 0 {
+		builder.WriteString("\x1b[92m\"")
+	}
+	builder.WriteString(strings.Join(quick.browses, "\x1b[0m\", \x1b[92m\""))
+	if len(quick.browses) > 0 {
+		builder.WriteString("\"\x1b[0m")
+	}
+	builder.WriteString("]\n\r")
+
+	builder.WriteString("\n\r")
 }
 
 func (quick *Quick) renderSearchBar(builder *strings.Builder) {
@@ -285,9 +319,14 @@ func (quick *Quick) RenderUI() {
 	builder.WriteString("\x1b[2K")
 	builder.WriteString(strings.Repeat("\x1b[1A\x1b[2K", quick.last_height))
 
-	// quick.renderTextInput(&builder)
 	if quick.search {
 		quick.renderSearchBar(&builder)
+	}
+	if quick.render_help {
+		quick.renderHelp(&builder)
+	}
+	if quick.render_filters {
+		quick.renderFilters(&builder)
 	}
 	quick.renderList(&builder)
 
@@ -321,10 +360,54 @@ func (quick *Quick) InitSearch() {
 
 		char := buf[0]
 
-		// 1. Handle Enter (Finished Typing)
-		if char == 13 || char == 10 {
-			quick.browses = []string{string(input)}
-			quick.filter()
+		// Handle Enter and Esc press
+		if char == 13 || char == 10 || char == 27 {
+			if len(input) > 0 && !(char == 27) {
+				prefix := string(input[:2])
+				doublePrefix := string(input[:4])
+
+				switch true {
+				case doublePrefix == ":f:c" || doublePrefix == ":F:c":
+					quick.filters = []string{}
+
+				case prefix == ":f" || prefix == ":F":
+					quick.filters = append(quick.filters, strings.Split(string(input[2:]), ",")...)
+
+				case doublePrefix == ":e:c" || doublePrefix == ":E:c":
+					quick.excludes = []string{}
+
+				case prefix == ":e" || prefix == ":E":
+					quick.excludes = append(quick.excludes, strings.Split(string(input[2:]), ",")...)
+
+				case doublePrefix == ":b:c" || doublePrefix == ":B:c":
+					quick.browses = []string{}
+
+				case prefix == ":b" || prefix == ":B":
+					strs := strings.Split(string(input[2:]), ",")
+
+					for i := range strs {
+						strs[i] = strings.TrimSpace(strs[i])
+					}
+
+					quick.browses = append(quick.browses, strs...)
+
+				case prefix == ":c" || prefix == ":C":
+					quick.filters = []string{}
+					quick.excludes = []string{}
+					quick.browses = []string{}
+
+				case prefix == ":a" || prefix == ":A":
+					quick.render_filters = !quick.render_filters
+
+				case prefix == ":h" || prefix == ":H":
+					quick.render_help = !quick.render_help
+
+				default:
+					quick.browses = []string{string(input)}
+				}
+
+				quick.filter()
+			}
 
 			quick.search = false
 
@@ -332,11 +415,6 @@ func (quick *Quick) InitSearch() {
 			quick.selection = 0
 			fmt.Print("\x1b[" + strconv.Itoa(quick.last_height) + "B")
 			quick.RenderUI()
-			break
-		}
-
-		// 2. Handle Ctrl+C (Abort)
-		if char == 3 {
 			break
 		}
 
