@@ -172,6 +172,7 @@ func (quick *Quick) filter() {
 	browseFolders(quick.f_folders, quick.browses)
 	filterFolders(quick.f_folders, quick.filters)
 	excludeFolders(quick.f_folders, quick.excludes)
+	browseFolders(quick.f_folders, quick.browses)
 }
 
 func (quick *Quick) getSize() (int, int, error) {
@@ -209,13 +210,17 @@ func (quick *Quick) renderTextInput(builder *strings.Builder) {
 }
 
 func (quick *Quick) renderSearchBar(builder *strings.Builder) {
-	builder.WriteString("\r:\n")
+	builder.WriteString("\r:\n\r")
 }
 
 func (quick *Quick) renderList(builder *strings.Builder) {
 	os.Chdir(lib.Config.ProjectPath())
 
 	space := quick.getFreeSpace(builder)
+
+	if space < 1 {
+		return
+	}
 
 	avgW := 0
 	folders := 0
@@ -303,7 +308,7 @@ func (quick *Quick) InitSearch() {
 	fmt.Print("\033[?25h")
 	defer fmt.Print("\033[?25l")
 
-	fmt.Print("\x1b[1;2H")
+	fmt.Print("\x1b[H\x1b[K2\r:")
 
 	buf := make([]byte, 1)
 	var input []byte
