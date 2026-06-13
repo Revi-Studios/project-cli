@@ -109,7 +109,9 @@ var quick = &cobra.Command{
 				switch buf[0] {
 				case 13:
 					term.Restore(int(os.Stdin.Fd()), oldState)
-					exec.Command("open", path.Join(lib.Config.ProjectPath(), (*quick.f_folders)[quick.selection].Name())).Run()
+					if len(*quick.f_folders)-1 >= quick.selection {
+						exec.Command("open", path.Join(lib.Config.ProjectPath(), (*quick.f_folders)[quick.selection].Name())).Run()
+					}
 					return nil
 				case 'q', 'Q', 3:
 					return nil
@@ -122,6 +124,8 @@ var quick = &cobra.Command{
 				case 'm', 'M':
 					quick.selection = min((quick.selection/quick.last_list_length)*quick.last_list_length+(quick.last_list_length-1)/2, len(*quick.f_folders)-1)
 					quick.RenderUI()
+				case 's', 'S':
+					quick.InitSearch()
 				}
 			}
 		}
@@ -142,7 +146,8 @@ type Quick struct {
 	folders   *[]os.DirEntry // All folders
 	f_folders *[]os.DirEntry // Filtered folders
 
-	selection int // quick.selection
+	selection      int // quick.selection
+	hide_selection bool
 
 	filters  []string
 	excludes []string
@@ -152,7 +157,7 @@ type Quick struct {
 	last_list_length int
 	left_space       int // How many rows are left before the terminal size is used up
 
-	list_length int
+	search bool
 }
 
 // Filters the folders with filters, excludes and browses and puts the result in f_folder
@@ -198,6 +203,10 @@ func (quick *Quick) renderTextInput(builder *strings.Builder) {
 	builder.WriteString("\n")
 }
 
+func (quick *Quick) renderSearchBar(builder *strings.Builder) {
+	builder.WriteString("\r:\n")
+}
+
 func (quick *Quick) renderList(builder *strings.Builder) {
 	os.Chdir(lib.Config.ProjectPath())
 
@@ -215,7 +224,7 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 		tags_str := strings.Join(tags, ", ")
 		avgW += len(folder.Name()) + 3
 		folders++
-		if i+(quick.selection/space)*space == (quick.selection)%len(*quick.f_folders) {
+		if i+(quick.selection/space)*space == (quick.selection)%len(*quick.f_folders) && !quick.hide_selection {
 			builder.WriteString(" > \033[7m")
 			builder.WriteString(folder.Name())
 			builder.WriteString("\033[0m")
@@ -232,6 +241,10 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 			builder.WriteString(strings.Repeat(" ", 8+2+len([]rune(tags_str))))
 			builder.WriteString("\n\r")
 		}
+
+	}
+	if min((quick.selection/space)*space+space, len(*quick.f_folders))-(quick.selection/space)*space == 0 {
+		builder.WriteString("   no projects found.")
 	}
 
 	if !(len(*quick.f_folders) <= space) {
@@ -263,6 +276,9 @@ func (quick *Quick) RenderUI() {
 	builder.WriteString(strings.Repeat("\x1b[1A\x1b[2K", quick.last_height))
 
 	// quick.renderTextInput(&builder)
+	if quick.search {
+		quick.renderSearchBar(&builder)
+	}
 	quick.renderList(&builder)
 
 	result := builder.String()
@@ -274,50 +290,58 @@ func (quick *Quick) RenderUI() {
 	fmt.Print(builder.String())
 }
 
-/*
-	func readTextInput(oldState *term.State) string {
-		// Temporarily show the blinking text cursor so the user knows where they are typing
-		fmt.Print("\033[?25h")
-		defer fmt.Print("\033[?25l") // Hide it again when done
+func (quick *Quick) InitSearch() {
+	quick.search = true
+	quick.hide_selection = true
+	quick.RenderUI()
 
-		var inputBytes []byte
-		buf := make([]byte, 1)
+	fmt.Print("\033[?25h")
+	defer fmt.Print("\033[?25l")
 
-		for {
-			_, err := os.Stdin.Read(buf)
-			if err != nil {
-				break
-			}
+	fmt.Print("\x1b[1;2H")
 
-			char := buf[0]
+	buf := make([]byte, 1)
+	var input []byte
 
-			// 1. Handle Enter (Finished Typing)
-			if char == 13 || char == 10 {
-				break
-			}
-
-			// 2. Handle Ctrl+C (Abort)
-			if char == 3 {
-				return ""
-			}
-
-			// 3. Handle Backspace (ASCII 127 or 8)
-			if char == 127 || char == 8 {
-				if len(inputBytes) > 0 {
-					inputBytes = inputBytes[:len(inputBytes)-1]
-					// Move cursor back, overwrite char with a space, move cursor back again
-					fmt.Print("\b \b")
-				}
-				continue
-			}
-
-			// 4. Handle standard printable characters
-			if char >= 32 && char <= 126 {
-				inputBytes = append(inputBytes, char)
-				fmt.Print(string(char)) // Manually echo the character to the terminal screen
-			}
+	for {
+		_, err := os.Stdin.Read(buf)
+		if err != nil {
+			break
 		}
 
-		return string(inputBytes)
+		char := buf[0]
+
+		// 1. Handle Enter (Finished Typing)
+		if char == 13 || char == 10 {
+			quick.browses = []string{string(input)}
+			quick.filter()
+
+			quick.search = false
+
+			quick.hide_selection = false
+			quick.selection = 0
+			fmt.Print("\x1b[" + strconv.Itoa(quick.last_height) + "B")
+			quick.RenderUI()
+			break
+		}
+
+		// 2. Handle Ctrl+C (Abort)
+		if char == 3 {
+			break
+		}
+
+		// 3. Handle Backspace (ASCII 127 or 8)
+		if (char == 127 || char == 8) && len(input) > 0 {
+			input = input[:len(input)-1]
+			fmt.Print("\b \b")
+
+			continue
+		}
+
+		// 4. Handle standard printable characters
+		if char >= 32 && char <= 126 {
+			input = append(input, char)
+			fmt.Print(string(char)) // Manually echo the character to the terminal screen
+		}
 	}
-*/
+}
