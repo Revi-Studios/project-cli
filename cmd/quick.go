@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path"
 	"strconv"
 	"strings"
 	"syscall"
@@ -96,10 +98,10 @@ var quick = &cobra.Command{
 					}
 					quick.RenderUI()
 				case 'C': // 67
-					quick.selection += min(quick.list_length, len(*quick.f_folders)-1-quick.selection)
+					quick.selection += min(quick.last_list_length, len(*quick.f_folders)-1-quick.selection)
 					quick.RenderUI()
 				case 'D': // 68
-					quick.selection -= min(quick.list_length, quick.selection)
+					quick.selection -= min(quick.last_list_length, quick.selection)
 					quick.RenderUI()
 				}
 			} else if numRead == 1 {
@@ -107,10 +109,19 @@ var quick = &cobra.Command{
 				switch buf[0] {
 				case 13:
 					term.Restore(int(os.Stdin.Fd()), oldState)
-					// exec.Command("open", path.Join(lib.Config.ProjectPath(), (*f_folders)[quick.selection].Name())).Run()
+					exec.Command("open", path.Join(lib.Config.ProjectPath(), (*quick.f_folders)[quick.selection].Name())).Run()
 					return nil
 				case 'q', 'Q', 3:
 					return nil
+				case 't', 'T':
+					quick.selection = (quick.selection / quick.last_list_length) * quick.last_list_length
+					quick.RenderUI()
+				case 'b', 'B':
+					quick.selection = min((quick.selection/quick.last_list_length)*quick.last_list_length+quick.last_list_length-1, len(*quick.f_folders)-1)
+					quick.RenderUI()
+				case 'm', 'M':
+					quick.selection = min((quick.selection/quick.last_list_length)*quick.last_list_length+(quick.last_list_length-1)/2, len(*quick.f_folders)-1)
+					quick.RenderUI()
 				}
 			}
 		}
@@ -137,8 +148,9 @@ type Quick struct {
 	excludes []string
 	browses  []string
 
-	last_height int
-	left_space  int // How many rows are left before the terminal size is used up
+	last_height      int
+	last_list_length int
+	left_space       int // How many rows are left before the terminal size is used up
 
 	list_length int
 }
@@ -194,7 +206,7 @@ func (quick *Quick) renderList(builder *strings.Builder) {
 	avgW := 0
 	folders := 0
 
-	quick.list_length = min(space, len(*quick.f_folders))
+	quick.last_list_length = min(space, len(*quick.f_folders))
 
 	builder.WriteString("\r")
 
