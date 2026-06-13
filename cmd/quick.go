@@ -13,6 +13,7 @@ import (
 
 	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
+	"golang.design/x/clipboard"
 	"golang.org/x/term"
 )
 
@@ -110,7 +111,11 @@ var quick = &cobra.Command{
 				case 13:
 					term.Restore(int(os.Stdin.Fd()), oldState)
 					if len(*quick.f_folders)-1 >= quick.selection {
-						exec.Command("open", path.Join(lib.Config.ProjectPath(), (*quick.f_folders)[quick.selection].Name())).Run()
+						err := clipboard.Init()
+						if err != nil {
+							panic(err)
+						}
+						clipboard.Write(clipboard.FmtText, []byte((*quick.f_folders)[quick.selection].Name()))
 					}
 					return nil
 				case 'q', 'Q', 3:
