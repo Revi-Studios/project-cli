@@ -412,7 +412,7 @@ func filterFolders(folders *[]os.DirEntry, filters []string) {
 	}
 
 	for i, f := range filters {
-		filters[i] = lib.Config.Shorthands.Tag(f)
+		filters[i] = lib.Config.Shorthands.Tag(strings.TrimSpace(f))
 	}
 
 	var filtered []os.DirEntry
@@ -437,7 +437,7 @@ func excludeFolders(folders *[]os.DirEntry, excludes []string) {
 	}
 
 	for i, e := range excludes {
-		excludes[i] = lib.Config.Shorthands.Tag(e)
+		excludes[i] = lib.Config.Shorthands.Tag(strings.TrimSpace(e))
 	}
 
 	var filtered []os.DirEntry
@@ -472,12 +472,6 @@ func browseFolders(folders *[]os.DirEntry, browses []string) {
 				break
 			}
 		}
-	}
-
-	if len(browses) == 1 {
-		fmt.Println("Search string:", strings.Join(browses, ", "))
-	} else {
-		fmt.Println("Search strings:", strings.Join(browses, ", "))
 	}
 
 	*folders = filtered
