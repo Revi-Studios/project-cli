@@ -8,10 +8,11 @@ import (
 )
 
 var pathCmd = &cobra.Command{
-	Use:   "path",
-	Short: "Show the path to the project folder",
-	Long:  "Show the path to the project folder",
-	Args:  cobra.ExactArgs(0),
+	Use:     "path",
+	Short:   "Show the path to the project folder",
+	Long:    "Show the path to the project folder",
+	Example: "project path\n\nproject path set ~/Projects\n\nproject path config",
+	Args:    cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println(lib.Config.ProjectPath())
 		return nil
@@ -19,10 +20,11 @@ var pathCmd = &cobra.Command{
 }
 
 var pathSetCmd = &cobra.Command{
-	Use:   "set <path>",
-	Short: "Set the path to the project folder",
-	Long:  "Set the path to the project folder",
-	Args:  cobra.ExactArgs(1),
+	Use:     "set <path>",
+	Short:   "Set the path to the project folder",
+	Long:    "Set the path to the project folder",
+	Example: "project path set ~/Projects\n\nproject path set ~/dev/projects\n\nproject path set /Users/me/projects",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		lib.Config.Projects.Path = args[0]
@@ -44,16 +46,17 @@ var pathSetCmd = &cobra.Command{
 }
 
 var pathConfig = &cobra.Command{
-	Use:   "config",
-	Short: "Show the path to the project folder",
-	Long:  "Show the path to the project folder",
+	Use:     "config",
+	Short:   "Show the path to the project folder",
+	Long:    "Show the path to the project folder",
+	Example: "project path config\n\nproject path\n\nproject path set ~/Projects",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(lib.ConfigPath)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(pathCmd)
+	Root.AddCommand(pathCmd)
 	pathCmd.AddCommand(pathSetCmd)
 	pathCmd.AddCommand(pathConfig)
 }

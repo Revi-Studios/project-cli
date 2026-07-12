@@ -10,14 +10,15 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(remove)
+	Root.AddCommand(remove)
 }
 
 var remove = &cobra.Command{
-	Use:   "remove <project>",
-	Short: "Delete a project",
-	Long:  "Remove a project",
-	Args:  cobra.ExactArgs(1),
+	Use:     "remove <project>",
+	Short:   "Delete a project",
+	Long:    "Remove a project",
+	Example: "project remove snake-game\n\nproject remove api-server\n\nproject remove notes",
+	Args:    cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
