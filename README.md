@@ -61,20 +61,5 @@ Now you´re all set. You can use the cli to create new projects with tags, list 
 
 ## How do I use it?
 
-Commands:
-
-```
-Usage:
-  project [flags]
-  project [command]
-
-Available Commands:
-  add       <name> <tag>        Add a new project
-  remove    <name>              Remove a project
-  open      <name> [flags]      Open a project
-  path                          Show the path to the project folder
-    set     <path>              Set the path to the project folder
-    config                      Show the path to the project folder
-  list      [flags]             List all projects
-  help      <command>           Help about any command
-```
+> [!TIP]
+> Check out the [docs](docs/md/project.md)
