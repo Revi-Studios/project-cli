@@ -9,13 +9,14 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(add)
+	Root.AddCommand(add)
 }
 
 var add = &cobra.Command{
-	Use:   "add <name> <tag>",
-	Short: "Add a new project",
-	Long:  `Add a new project to the project list`,
+	Use:     "add <name> <tag>",
+	Short:   "Add a new project",
+	Long:    `Add a new project to the projects folder`,
+	Example: "project add snake-game web,javascript\n\nproject add api-server go,backend\n\nproject add notes",
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp

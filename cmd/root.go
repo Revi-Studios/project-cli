@@ -8,10 +8,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "project",
-	Short: "",
-	Long:  `Base command. If another command isn't added, it opens the project folder.`,
+var Root = &cobra.Command{
+	Use:     "project",
+	Short:   "Base command",
+	Long:    `Base command. If another command isn't added, it opens the project folder.`,
+	Example: "project\n\nproject list\n\nproject quick",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := lib.OpenFolder(lib.Config.ProjectPath())
 		if err != nil {
@@ -22,7 +23,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := Root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

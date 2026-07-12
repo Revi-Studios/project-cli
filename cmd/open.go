@@ -12,8 +12,9 @@ import (
 )
 
 var openCmd = &cobra.Command{
-	Use:  "open <project> [flags]",
-	Args: cobra.ExactArgs(1),
+	Use:     "open <project> [flags]",
+	Example: "project open snake-game --app finder\n\nproject open api-server -a terminal\n\nproject open notes -a editor",
+	Args:    cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -87,5 +88,5 @@ func init() {
 	openCmd.RegisterFlagCompletionFunc("app", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"finder", "terminal", "editor"}, cobra.ShellCompDirectiveNoFileComp
 	})
-	rootCmd.AddCommand(openCmd)
+	Root.AddCommand(openCmd)
 }

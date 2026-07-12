@@ -1,0 +1,39 @@
+# {{ .CommandPath }}{{ if .HasLong }}
+
+&nbsp;&nbsp;&nbsp;&nbsp;`$ {{ .Use | safe }}`
+
+{{ .Long }}{{ else }}
+
+{{ .Short }}
+
+&nbsp;&nbsp;{{ .Use | safe }}
+
+{{ end }}{{ if .Aliases }}
+## Aliases
+{{ range .Aliases }}- `{{ . }}`
+{{ end }}{{ end }}
+{{ if .HasAvailableLocalFlags }}
+## Options
+
+{{ range .LocalFlags }}
+{{ if .Shorthand }} `-{{ .Shorthand }}`, {{ end }} `--{{ .Name | safe }}`
+
+&nbsp;&nbsp;&nbsp;&nbsp;{{ .Usage }}
+{{ end }}{{ end }}
+{{ if .HasExample }}
+## Examples
+```
+{{ .Example | safe }}
+```
+{{ end }}
+{{ if .HasAvailableSubCommands }}
+## Subcommands
+{{ range .SubCommands }}- [`{{ .Name }}`]({{ .MdFile }}) - {{ .Short }}
+{{ end }}{{ end }}
+{{ if .HasParent }}
+## See also
+- [`{{ .Parent.Name }}`]({{ .Parent.MdFile }}) - {{ .Parent.Short }}
+{{ if .Parent.HasAvailableSubCommands }}{{ $currentName := .Name }}{{ range .Parent.SubCommands }}
+	- [`{{ .Name }}`]({{ .MdFile }}) - {{ .Short }}{{ if eq .Name $currentName }} ***<-- current*** {{ end }}
+{{ end }}{{ end }}
+{{ end }}

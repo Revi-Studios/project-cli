@@ -13,15 +13,16 @@ import (
 var untag bool
 
 func init() {
-	rootCmd.AddCommand(tag)
+	Root.AddCommand(tag)
 	tag.Flags().BoolVarP(&untag, "untag", "u", false, "Untag one or multiple tags from a project")
 }
 
 var tag = &cobra.Command{
-	Use:   "tag <project> <tags> [flags]",
-	Short: "tag project",
-	Long:  "Manage tags on a project",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "tag <project> <tags> [flags]",
+	Short:   "tag project",
+	Long:    "Manage tags on a project",
+	Example: "project tag snake-game go,web\n\nproject tag snake-game\n\nproject tag snake-game rust -u",
+	Args:    cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) > 1 {
 			tags := make([]string, 0, len(lib.Config.Tags))

@@ -20,8 +20,12 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
 	Short: "List projects",
-	Long:  "Filter different types of projects and list them",
-	Args:  cobra.ExactArgs(0),
+	Long: `Filter different types of projects and list them quickly.
+
+This allows you to view your projects in different ways
+	`,
+	Example: "project list --view grid --exclude none\n\nproject list -v c --filter go,rust,c#\n\nproject list --browse cli",
+	Args:    cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		os.Chdir(lib.Config.ProjectPath() + "/")
 
@@ -305,7 +309,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP("view", "v", "", "--view <view-type>")
+	listCmd.Flags().StringP("view <list|category|grid>", "v", "", "Specifies which layout you want to view your projects in.")
 	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
 	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
 	listCmd.Flags().StringSliceP("browse", "b", []string{}, "--browse <string>")
@@ -326,7 +330,7 @@ func init() {
 		}
 		return tags, cobra.ShellCompDirectiveNoFileComp
 	})
-	rootCmd.AddCommand(listCmd)
+	Root.AddCommand(listCmd)
 }
 
 // Functions
