@@ -68,9 +68,6 @@ This allows you to view your projects in different ways
 		var longestTagName int
 
 		str, _ := cmd.Flags().GetString("view")
-		if str == "" {
-			str = lib.Config.Defaults.View
-		}
 
 		switch str {
 
@@ -309,7 +306,7 @@ This allows you to view your projects in different ways
 }
 
 func init() {
-	listCmd.Flags().StringP("view <list|category|grid>", "v", "", "Specifies which layout you want to view your projects in.")
+	listCmd.Flags().StringP("view", "v", lib.Config.Defaults.View, "Specifies which layout you want to view your projects in.")
 	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
 	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
 	listCmd.Flags().StringSliceP("browse", "b", []string{}, "--browse <string>")
