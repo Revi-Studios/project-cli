@@ -23,7 +23,7 @@ var quick = &cobra.Command{
 	Use:     "quick",
 	Short:   "Open the Quick opener",
 	Long:    "Open the Quick opener that makes it quicker to open projects",
-	Example: "project quick\n\nproject list --browse cli\n\nproject list --filter go,rust",
+	Example: "project quick",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		folders, err := func() (*[]os.DirEntry, error) {
 			files, err := os.ReadDir(lib.Config.ProjectPath() + "/")

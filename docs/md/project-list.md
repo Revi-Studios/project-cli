@@ -22,7 +22,7 @@ This allows you to view your projects in different ways
 
 &nbsp;&nbsp;&nbsp;&nbsp;--filter &lt;tags&gt;
 
- `-v`,  `--view <list|category|grid>`
+ `-v`,  `--view`
 
 &nbsp;&nbsp;&nbsp;&nbsp;Specifies which layout you want to view your projects in.
 
@@ -41,9 +41,9 @@ project list --browse cli
 ## See also
 - [`project`](project.md) - Base command
 
-	- [`add`](project-add.md) - Add a new project
-
 	- [`list`](project-list.md) - List projects ***&lt;-- current*** 
+
+	- [`new`](project-new.md) - Create a new project
 
 	- [`open`](project-open.md) - Open a project
 

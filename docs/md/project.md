@@ -16,8 +16,8 @@ project quick
 
 
 ## Subcommands
-- [`add`](project-add.md) - Add a new project
 - [`list`](project-list.md) - List projects
+- [`new`](project-new.md) - Create a new project
 - [`open`](project-open.md) - Open a project
 - [`path`](project-path.md) - Show the path to the project folder
 - [`quick`](project-quick.md) - Open the Quick opener

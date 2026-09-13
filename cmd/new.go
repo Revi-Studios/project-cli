@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -8,15 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var open bool
+
 func init() {
-	Root.AddCommand(add)
+	new.Flags().BoolVarP(&open, "open", "o", false, "Open project in default target application")
+	Root.AddCommand(new)
 }
 
-var add = &cobra.Command{
-	Use:     "add <name> <tag>",
-	Short:   "Add a new project",
-	Long:    `Add a new project to the projects folder`,
-	Example: "project add snake-game web,javascript\n\nproject add api-server go,backend\n\nproject add notes",
+var new = &cobra.Command{
+	Use:     "new <name> <tag>",
+	Short:   "Create a new project",
+	Long:    `Create a new project in the projects folder`,
+	Example: "project new snake-game web,javascript\n\nproject new api-server go,backend\n\nproject new notes",
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -34,11 +38,16 @@ var add = &cobra.Command{
 		projectPath := lib.Config.ProjectPath() + "/" + name
 		err := os.Mkdir(projectPath, 0755)
 
+		if errors.Is(err, os.ErrExist) {
+			fmt.Printf("Project \"%s\" already exist\n", name)
+			return nil
+		}
+
 		if err != nil {
 			return fmt.Errorf("creating the directory: %w", err)
 		}
 
-		fmt.Println("Project created at:", projectPath)
+		fmt.Printf("Project \"%s\" created at: \033]8;;%s\033\\%s\033]8;;\033\\\n", name, fmt.Sprintf("file://%s/", projectPath), projectPath)
 
 		if len(args) > 1 {
 			tags := make([]string, 0, len(args)-1)
@@ -53,6 +62,10 @@ var add = &cobra.Command{
 
 		if err := lib.SetTags(projectPath, lib.Config.Defaults.Tag); err != nil {
 			return fmt.Errorf("Error adding tag: %w", err)
+		}
+
+		if open {
+			lib.OpenProjectInApp(name, "")
 		}
 
 		return nil

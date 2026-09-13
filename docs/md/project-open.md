@@ -7,18 +7,18 @@ Open a project
 ## Options
 
 
- `-a`,  `--app`
+ `-t`,  `--target`
 
-&nbsp;&nbsp;&nbsp;&nbsp;--app &lt;platform/target&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;--target &lt;application&gt;
 
 
 ## Examples
 ```
-project open snake-game --app finder
+project open snake-game --target finder
 
-project open api-server -a terminal
+project open api-server -t terminal
 
-project open notes -a editor
+project open notes -t editor
 ```
 
 
@@ -26,9 +26,9 @@ project open notes -a editor
 ## See also
 - [`project`](project.md) - Base command
 
-	- [`add`](project-add.md) - Add a new project
-
 	- [`list`](project-list.md) - List projects
+
+	- [`new`](project-new.md) - Create a new project
 
 	- [`open`](project-open.md) - Open a project ***&lt;-- current*** 
 

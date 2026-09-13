@@ -1,17 +1,24 @@
-# project add
+# project new
 
-&nbsp;&nbsp;&nbsp;&nbsp;`$ project add <name> <tag>`
+&nbsp;&nbsp;&nbsp;&nbsp;`$ project new <name> <tag> [flags]`
 
-Add a new project to the projects folder
+Create a new project in the projects folder
+
+## Options
+
+
+ `-o`,  `--open`
+
+&nbsp;&nbsp;&nbsp;&nbsp;Open project in default target application
 
 
 ## Examples
 ```
-project add snake-game web,javascript
+project new snake-game web,javascript
 
-project add api-server go,backend
+project new api-server go,backend
 
-project add notes
+project new notes
 ```
 
 
@@ -19,9 +26,9 @@ project add notes
 ## See also
 - [`project`](project.md) - Base command
 
-	- [`add`](project-add.md) - Add a new project ***&lt;-- current*** 
-
 	- [`list`](project-list.md) - List projects
+
+	- [`new`](project-new.md) - Create a new project ***&lt;-- current*** 
 
 	- [`open`](project-open.md) - Open a project
 

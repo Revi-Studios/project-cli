@@ -19,9 +19,9 @@ project remove notes
 ## See also
 - [`project`](project.md) - Base command
 
-	- [`add`](project-add.md) - Add a new project
-
 	- [`list`](project-list.md) - List projects
+
+	- [`new`](project-new.md) - Create a new project
 
 	- [`open`](project-open.md) - Open a project
 

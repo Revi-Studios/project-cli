@@ -8,10 +8,6 @@ Open the Quick opener that makes it quicker to open projects
 ## Examples
 ```
 project quick
-
-project list --browse cli
-
-project list --filter go,rust
 ```
 
 
@@ -19,9 +15,9 @@ project list --filter go,rust
 ## See also
 - [`project`](project.md) - Base command
 
-	- [`add`](project-add.md) - Add a new project
-
 	- [`list`](project-list.md) - List projects
+
+	- [`new`](project-new.md) - Create a new project
 
 	- [`open`](project-open.md) - Open a project
 

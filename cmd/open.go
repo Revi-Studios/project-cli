@@ -13,7 +13,7 @@ import (
 
 var openCmd = &cobra.Command{
 	Use:     "open <project> [flags]",
-	Example: "project open snake-game --app finder\n\nproject open api-server -a terminal\n\nproject open notes -a editor",
+	Example: "project open snake-game --target finder\n\nproject open api-server -t terminal\n\nproject open notes -t editor",
 	Args:    cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) != 0 {
@@ -45,7 +45,7 @@ var openCmd = &cobra.Command{
 		name := lib.Config.Shorthands.Project(args[0])
 		path := lib.Config.ProjectPath() + "/" + name + "/"
 
-		target, _ := cmd.Flags().GetString("app")
+		target, _ := cmd.Flags().GetString("target")
 		if target == "" {
 			target = lib.Config.Defaults.Open
 		}
@@ -77,15 +77,15 @@ var openCmd = &cobra.Command{
 		// Turns the first character to uppercase
 		targetToCapital := func() string { str := []rune(target); return strings.ToUpper(string(str[0])) + string(str[1:]) }()
 
-		fmt.Printf("Opened project: \"%s\" in %s\n", name, targetToCapital)
+		fmt.Printf("Opened \"%s\" in %s\n", name, targetToCapital)
 
 		return nil
 	},
 }
 
 func init() {
-	openCmd.Flags().StringP("app", "a", "", "--app <platform/target>")
-	openCmd.RegisterFlagCompletionFunc("app", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	openCmd.Flags().StringP("target", "t", "", "--target <application>")
+	openCmd.RegisterFlagCompletionFunc("target", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"finder", "terminal", "editor"}, cobra.ShellCompDirectiveNoFileComp
 	})
 	Root.AddCommand(openCmd)
