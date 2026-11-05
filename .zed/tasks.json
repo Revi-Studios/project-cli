@@ -3,4 +3,9 @@
 		"label": "Generate Docs",
 		"command": "cd docs && go run docs.go",
 	},
+	// Note: rzsh is a custom alias on my machine :)
+	{
+		"label": "Install CLI",
+		"command": "go install . && go run . completion zsh > ~/.zsh/functions/_project && rzsh",
+	},
 ]
