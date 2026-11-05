@@ -1,0 +1,6 @@
+[
+	{
+		"label": "Generate Docs",
+		"command": "cd docs && go run docs.go",
+	},
+]
