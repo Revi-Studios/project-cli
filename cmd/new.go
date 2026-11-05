@@ -25,10 +25,15 @@ var new = &cobra.Command{
 		if len(args) == 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
-		tags := make([]string, 0, len(lib.Config.Tags))
-		for _, tag := range lib.Config.Tags {
-			tags = append(tags, "\""+tag+"\"")
+		// tags := make([]string, 0, len(lib.Config.Tags))
+		// for _, tag := range lib.Config.Tags {
+		// 	tags = append(tags, "\""+tag+"\"")
+		// }
+		tags := make([]string, 0, len(lib.Config.Shorthands.Tags))
+		for tag := range lib.Config.Shorthands.Tags {
+			tags = append(tags, tag)
 		}
+
 		return tags, cobra.ShellCompDirectiveNoFileComp
 	},
 	Args: cobra.MinimumNArgs(1),

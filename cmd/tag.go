@@ -24,10 +24,10 @@ var tag = &cobra.Command{
 	Example: "project tag snake-game go,web\n\nproject tag snake-game\n\nproject tag snake-game rust -u",
 	Args:    cobra.MinimumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) > 1 {
-			tags := make([]string, 0, len(lib.Config.Tags))
-			for _, tag := range lib.Config.Tags {
-				tags = append(tags, "\""+tag+"\"")
+		if len(args) != 0 {
+			tags := make([]string, 0, len(lib.Config.Shorthands.Tags))
+			for tag := range lib.Config.Shorthands.Tags {
+				tags = append(tags, tag)
 			}
 			return tags, cobra.ShellCompDirectiveNoFileComp
 		}

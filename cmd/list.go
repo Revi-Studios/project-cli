@@ -17,6 +17,35 @@ import (
 	"golang.org/x/term"
 )
 
+func init() {
+	listCmd.Flags().StringP("view", "v", lib.Config.Defaults.View, "Specifies which layout you want to view your projects in.")
+	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
+	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
+	listCmd.Flags().StringSliceP("browse", "b", []string{}, "--browse <string>")
+
+	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
+	})
+	listCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		tags := make([]string, 0, len(lib.Config.Shorthands.Tags))
+		for tag := range lib.Config.Shorthands.Tags {
+			tags = append(tags, tag)
+		}
+		return tags, cobra.ShellCompDirectiveNoFileComp
+	})
+	listCmd.RegisterFlagCompletionFunc("exclude", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		tags := make([]string, 0, len(lib.Config.Shorthands.Tags))
+		for tag := range lib.Config.Shorthands.Tags {
+			tags = append(tags, tag)
+		}
+		return tags, cobra.ShellCompDirectiveNoFileComp
+	})
+	listCmd.RegisterFlagCompletionFunc("browse", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
+	Root.AddCommand(listCmd)
+}
+
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
 	Short: "List projects",
@@ -305,31 +334,6 @@ This allows you to view your projects in different ways
 	},
 }
 
-func init() {
-	listCmd.Flags().StringP("view", "v", lib.Config.Defaults.View, "Specifies which layout you want to view your projects in.")
-	listCmd.Flags().StringSliceP("filter", "f", []string{}, "--filter <tags>")
-	listCmd.Flags().StringSliceP("exclude", "e", []string{}, "--exclude <tags>")
-	listCmd.Flags().StringSliceP("browse", "b", []string{}, "--browse <string>")
-	listCmd.RegisterFlagCompletionFunc("view", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"list", "category", "grid"}, cobra.ShellCompDirectiveNoFileComp
-	})
-	listCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		tags := make([]string, 0, len(lib.Config.Tags))
-		for _, tag := range lib.Config.Tags {
-			tags = append(tags, "\""+tag+"\"")
-		}
-		return tags, cobra.ShellCompDirectiveNoFileComp
-	})
-	listCmd.RegisterFlagCompletionFunc("exlude", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		tags := make([]string, 0, len(lib.Config.Tags))
-		for _, tag := range lib.Config.Tags {
-			tags = append(tags, "\""+tag+"\"")
-		}
-		return tags, cobra.ShellCompDirectiveNoFileComp
-	})
-	Root.AddCommand(listCmd)
-}
-
 // Functions
 func getBit(bitMap *uint64, index int) int {
 	return int((*bitMap >> index) & 1)
@@ -468,7 +472,7 @@ func browseFolders(folders *[]os.DirEntry, browses []string) {
 
 	for _, folder := range *folders {
 		for _, str := range browses {
-			if strings.Contains(folder.Name(), str) {
+			if strings.Contains(strings.ToLower(folder.Name()), strings.ToLower(str)) {
 				filtered = append(filtered, folder)
 				break
 			}
