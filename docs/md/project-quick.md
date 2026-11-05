@@ -1,8 +1,15 @@
 # project quick
 
-&nbsp;&nbsp;&nbsp;&nbsp;`$ project quick`
+&nbsp;&nbsp;&nbsp;&nbsp;`$ project quick [flags]`
 
 Open the Quick opener that makes it quicker to open projects
+
+## Options
+
+
+ `-o`,  `--open`
+
+&nbsp;&nbsp;&nbsp;&nbsp;Open the project on submit
 
 
 ## Examples

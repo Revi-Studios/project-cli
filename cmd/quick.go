@@ -17,7 +17,10 @@ import (
 
 func init() {
 	Root.AddCommand(quick)
+	quick.Flags().BoolVarP(&flag_open, "open", "o", false, "Open the project on submit")
 }
+
+var flag_open bool
 
 var quick = &cobra.Command{
 	Use:     "quick",
@@ -107,14 +110,19 @@ var quick = &cobra.Command{
 			} else if numRead == 1 {
 				// Handle Single Keypresses
 				switch buf[0] {
-				case 13:
+				case 13: // Hanlle Escape
 					term.Restore(int(os.Stdin.Fd()), oldState)
 					if len(*quick.f_folders)-1 >= quick.selection {
-						err := clipboard.Init()
-						if err != nil {
-							panic(err)
+						switch true {
+						case flag_open:
+							lib.OpenProjectInApp((*quick.f_folders)[quick.selection].Name(), "")
+						default:
+							err := clipboard.Init()
+							if err != nil {
+								panic(err)
+							}
+							clipboard.Write(clipboard.FmtText, []byte((*quick.f_folders)[quick.selection].Name()))
 						}
-						clipboard.Write(clipboard.FmtText, []byte((*quick.f_folders)[quick.selection].Name()))
 					}
 					return nil
 				case 'q', 'Q', 3:
