@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Revi-Studios/project/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -15,15 +14,8 @@ func init() {
 var Root = &cobra.Command{
 	Use:     "project",
 	Short:   "Base command",
-	Long:    `Base command. If another command isn't added, it opens the project folder.`,
+	Long:    `A command-line utility for Project managment.`,
 	Example: "project\n\nproject list\n\nproject quick",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		err := lib.OpenFolder(lib.Config.ProjectPath())
-		if err != nil {
-			return fmt.Errorf("Faild to open the project folder: %w", err)
-		}
-		return nil
-	},
 }
 
 func Execute() {
