@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	Root.CompletionOptions.HiddenDefaultCmd = true
+}
+
 var Root = &cobra.Command{
 	Use:     "project",
 	Short:   "Base command",

@@ -16,9 +16,6 @@ var openCmd = &cobra.Command{
 	Example: "project open snake-game --target finder\n\nproject open api-server -t terminal\n\nproject open notes -t editor",
 	Args:    cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) != 0 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
 		folders, err := func() ([]string, error) {
 			files, err := os.ReadDir(lib.Config.ProjectPath() + "/")
 			if err != nil {
