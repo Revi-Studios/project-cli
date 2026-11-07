@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,14 +13,20 @@ import (
 const attrname string = "com.apple.metadata:_kMDItemUserTags"
 
 func GetTags(path string) ([]string, error) {
-
 	data, err := xattr.Get(path, attrname)
+	if errors.Is(err, xattr.ENOATTR) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
 	var tags []string
 	decoder := plist.NewDecoder(bytes.NewReader(data))
 	decoder.Decode(&tags)
+
+	if len(tags) == 1 && tags[0] == "" {
+		return nil, nil
+	}
 
 	for i, t := range tags {
 		tag := strings.Split(t, "\n")

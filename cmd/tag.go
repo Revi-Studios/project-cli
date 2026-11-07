@@ -62,7 +62,11 @@ var tag = &cobra.Command{
 				return fmt.Errorf("reading existing tags: %w", err)
 			}
 
-			fmt.Println(strings.Join(tags, ", "))
+			if len(tags) == 0 {
+				fmt.Println("No tags")
+			} else {
+				fmt.Println(strings.Join(tags, ", "))
+			}
 			return nil
 		}
 
@@ -72,7 +76,6 @@ var tag = &cobra.Command{
 		}
 
 		tags, err := lib.GetTags(path)
-
 		if err != nil {
 			return fmt.Errorf("reading existing tags: %w", err)
 		}
